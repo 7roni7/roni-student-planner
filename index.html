@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#a8d100">
-    <meta name="description" content="רוני סטודנט פלאנר - ניהול עומסי לימודים, מערכת שעות ומשימות">
+    <meta name="description" content="רוני סטודנט פלאנר - ניהול עומסי לימודים, מערכת שעות ומשימות לסטודנטים">
     
     <title>רוני סטודנט פלאנר</title>
 
@@ -85,7 +85,7 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
-        /* Highlight styles */
+        /* Custom card highlight styles */
         .canceled-course-card {
             background-color: rgba(239, 68, 68, 0.12) !important;
             border-right: 6px solid #ef4444 !important;
@@ -98,13 +98,13 @@
 </head>
 <body class="bg-slate-100 text-slate-800 antialiased h-full flex flex-col justify-between">
 
-    <!-- Edge-to-Edge Mobile Layout Container -->
+    <!-- Edge-to-Edge Mobile Container -->
     <div class="w-full max-w-md mx-auto bg-white min-h-full flex flex-col relative overflow-hidden shadow-none sm:shadow-2xl sm:rounded-3xl sm:my-2">
 
-        <!-- HEADER BAR (RONI STUDENT PLANNER) -->
+        <!-- HEADER BAR -->
         <header class="bg-onoLime text-slate-900 px-3.5 py-3 sticky top-0 z-30 shadow-xs shrink-0 flex flex-col gap-2">
             
-            <!-- Top App Title & Action Buttons -->
+            <!-- App Title & Action Header Row -->
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <div class="w-8 h-8 rounded-xl bg-slate-900 text-onoLime flex items-center justify-center font-black text-sm shadow-xs">
@@ -114,8 +114,13 @@
                 </div>
 
                 <div class="flex items-center gap-1.5">
-                    <!-- PWA Install Button (Shown if installable) -->
-                    <button id="pwaInstallBtn" onclick="installPWA()" class="hidden bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-xl transition flex items-center gap-1 shadow-xs animate-bounce">
+                    <!-- Family Time / Blocked Hours Settings (Gear Icon) -->
+                    <button onclick="openBlockedTimesModal()" class="bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold p-2 rounded-xl transition flex items-center justify-center shadow-xs" title="הגדרת זמנים חסומים / זמן משפחה">
+                        <i class="fa-solid fa-gear text-onoLime text-xs"></i>
+                    </button>
+
+                    <!-- PWA Install Button -->
+                    <button id="pwaInstallBtn" onclick="installPWA()" class="hidden bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold px-2 py-1.5 rounded-xl transition flex items-center gap-1 shadow-xs animate-bounce">
                         <i class="fa-solid fa-mobile-screen-button text-onoLime text-xs"></i>
                         <span>📲 התקן</span>
                     </button>
@@ -123,7 +128,7 @@
                     <!-- Excel Import Button -->
                     <button onclick="openExcelImportModal()" class="bg-slate-900/90 hover:bg-slate-900 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-xl transition flex items-center gap-1 shadow-xs">
                         <i class="fa-solid fa-file-excel text-onoLime text-xs"></i>
-                        <span>ייבוא אקסל</span>
+                        <span>ייבוא</span>
                     </button>
 
                     <!-- Web Notifications Button -->
@@ -209,6 +214,41 @@
             <i class="fa-solid fa-plus"></i>
         </button>
 
+    </div>
+
+    <!-- FAMILY TIME / BLOCKED HOURS SETTINGS MODAL (⚙️) -->
+    <div id="blockedTimesModal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs hidden flex items-center justify-center p-3 sm:p-4">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-pop border border-slate-100">
+            <div class="bg-slate-900 text-white px-5 py-3.5 flex justify-between items-center shrink-0 border-b border-slate-800">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-clock-slash text-onoLime text-lg"></i>
+                    <h2 class="text-sm font-black">הגדרת זמנים חסומים / זמן משפחה</h2>
+                </div>
+                <button onclick="closeBlockedTimesModal()" class="text-slate-400 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <div class="p-4 overflow-y-auto space-y-3.5 text-xs flex-1 bg-slate-50">
+                <p class="text-[11px] text-slate-600 bg-amber-50 p-2.5 rounded-xl border border-amber-200">
+                    <i class="fa-solid fa-circle-info text-amber-600"></i>
+                    הזמנים שתגדיר כאן לא יופיעו ביומן, אך המערכת תימנע באופן מוחלט משבוץ משימות בשעות אלו (זמן משפחה/מנוחה).
+                </p>
+
+                <div id="blockedTimesDaysContainer" class="space-y-3">
+                    <!-- Dynamic rendering of Sunday - Saturday -->
+                </div>
+            </div>
+
+            <div class="bg-slate-100 px-4 py-3 border-t border-slate-200 flex justify-end gap-2 shrink-0">
+                <button onclick="closeBlockedTimesModal()" class="py-2.5 px-4 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl font-bold text-xs transition">
+                    ביטול
+                </button>
+                <button onclick="saveBlockedTimesSettings()" class="py-2.5 px-5 bg-onoLime hover:bg-onoLimeDark text-slate-900 rounded-xl font-black text-xs shadow-xs transition">
+                    שמור הגדרות זמנים
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- QUICK MONTH & YEAR SELECTOR MODAL -->
@@ -420,10 +460,13 @@
                 </div>
 
                 <div id="courseSelectWrapper">
-                    <label class="block text-xs font-bold text-slate-700 mb-1">שם הקורס השייך</label>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-xs font-bold text-slate-700">שם הקורס השייך</label>
+                        <span class="text-[10px] text-slate-400 font-semibold">(מסונן מהתאריך הנבחר ואילך)</span>
+                    </div>
                     <div class="flex gap-2">
                         <select id="taskCourseSelect" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-bold text-slate-800 focus:ring-2 focus:ring-onoLime focus:outline-none">
-                            <!-- Populated dynamically -->
+                            <!-- Filtered dynamically by active date -->
                         </select>
                         <button onclick="addNewCoursePrompt()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-3 rounded-xl text-xs font-bold transition shrink-0 flex items-center gap-1">
                             <i class="fa-solid fa-plus"></i> חדש
@@ -434,7 +477,7 @@
                 <div id="standardTaskFields" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">שם המשימה/העבודה</label>
-                        <input type="text" id="taskTitleInput" placeholder="למשל: עבודת הגשה" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-800 font-medium focus:ring-2 focus:ring-onoLime focus:outline-none">
+                        <input type="text" id="taskTitleInput" placeholder="למשל: שינון מושגים לבוחן" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-800 font-medium focus:ring-2 focus:ring-onoLime focus:outline-none">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">תאריך יעד (סיום)</label>
@@ -500,11 +543,12 @@
                 </div>
 
                 <div id="scheduleProposalResult" class="hidden mt-4 pt-3 border-t border-slate-200">
-                    <h3 class="text-xs font-extrabold text-slate-800 mb-2.5 flex items-center gap-1.5">
+                    <h3 class="text-xs font-extrabold text-slate-800 mb-1 flex items-center gap-1.5">
                         <i class="fa-solid fa-wand-magic-sparkles text-amber-500 text-sm"></i> הצעת שיבוץ וחלוקה ליומן:
                     </h3>
-                    <div id="proposalTimeline" class="space-y-2 max-h-52 overflow-y-auto pr-1">
-                        <!-- Proposal rows -->
+                    <p class="text-[10px] text-slate-500 mb-2.5">ניתן לשנות תאריך/שעה בלחיצה בשורה מסוימת, והמערכת תזיז אוטומטית את יתר השלבים!</p>
+                    <div id="proposalTimeline" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                        <!-- Proposal rows with interactive inputs -->
                     </div>
                 </div>
 
@@ -634,9 +678,7 @@
                 const swCode = `
                     self.addEventListener('install', (e) => self.skipWaiting());
                     self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
-                    self.addEventListener('fetch', (e) => {
-                        // Passthrough for dynamic app
-                    });
+                    self.addEventListener('fetch', (e) => {});
                 `;
                 const swBlob = new Blob([swCode], { type: 'text/javascript' });
                 const swUrl = URL.createObjectURL(swBlob);
@@ -685,7 +727,7 @@
             "כללי": "#64748b"
         };
 
-        // --- CLEAN INITIAL APP STATE (EMPTY EVENTS ARRAY FOR FRESH APP START) ---
+        // --- GLOBAL APP STATE ---
         let state = {
             currentDate: new Date(),
             selectedDate: new Date(),
@@ -703,8 +745,17 @@
                 { id: 'c9', name: 'התנסות קלינית דיבור', color: COURSE_COLORS['התנסות קלינית דיבור'] },
                 { id: 'general', name: 'כללי', color: COURSE_COLORS['כללי'] }
             ],
-            events: [], // Clean empty array!
+            events: [],
             taskGroups: [],
+            blockedTimes: {
+                0: [{ start: "18:00", end: "21:00" }], // Sun
+                1: [{ start: "18:00", end: "21:00" }], // Mon
+                2: [{ start: "18:00", end: "21:00" }], // Tue
+                3: [{ start: "18:00", end: "21:00" }], // Wed
+                4: [{ start: "18:00", end: "21:00" }], // Thu
+                5: [], // Fri
+                6: []  // Sat
+            },
             activeModalTask: null,
             activeModalStepIdx: 0,
             activeCourseEvent: null,
@@ -716,16 +767,17 @@
         // --- LOCAL STORAGE PERSISTENCE ---
         function loadSavedData() {
             try {
-                const savedGroups = localStorage.getItem('student_planner_groups_v6');
+                const savedGroups = localStorage.getItem('student_planner_groups_v7');
                 if (savedGroups) state.taskGroups = JSON.parse(savedGroups);
 
-                const savedCourses = localStorage.getItem('student_planner_courses_v6');
+                const savedCourses = localStorage.getItem('student_planner_courses_v7');
                 if (savedCourses) state.courses = JSON.parse(savedCourses);
 
-                const savedEvents = localStorage.getItem('student_planner_events_v6');
-                if (savedEvents) {
-                    state.events = JSON.parse(savedEvents);
-                }
+                const savedEvents = localStorage.getItem('student_planner_events_v7');
+                if (savedEvents) state.events = JSON.parse(savedEvents);
+
+                const savedBlocked = localStorage.getItem('student_planner_blocked_v7');
+                if (savedBlocked) state.blockedTimes = JSON.parse(savedBlocked);
             } catch (e) {
                 console.error("Local storage read error:", e);
             }
@@ -733,9 +785,10 @@
 
         function saveData() {
             try {
-                localStorage.setItem('student_planner_groups_v6', JSON.stringify(state.taskGroups));
-                localStorage.setItem('student_planner_courses_v6', JSON.stringify(state.courses));
-                localStorage.setItem('student_planner_events_v6', JSON.stringify(state.events));
+                localStorage.setItem('student_planner_groups_v7', JSON.stringify(state.taskGroups));
+                localStorage.setItem('student_planner_courses_v7', JSON.stringify(state.courses));
+                localStorage.setItem('student_planner_events_v7', JSON.stringify(state.events));
+                localStorage.setItem('student_planner_blocked_v7', JSON.stringify(state.blockedTimes));
             } catch (e) {
                 console.error("Local storage write error:", e);
             }
@@ -752,7 +805,7 @@
             document.getElementById('taskDueDateInput').value = formatDateISO(defaultDueDate);
             document.getElementById('manualCourseDateInput').value = formatDateISO(state.selectedDate);
 
-            populateCourseSelect();
+            populateFilteredCourseSelect();
             handleTaskTypeChange();
             renderApp();
         };
@@ -763,7 +816,7 @@
             renderSelectedDaySchedule();
         }
 
-        // --- CALENDAR NAVIGATION (LEFT = NEXT, RIGHT = PREVIOUS) ---
+        // --- CALENDAR NAVIGATION ---
         function navigateDate(direction) {
             if (state.viewMode === 'month') {
                 state.currentDate.setMonth(state.currentDate.getMonth() + direction);
@@ -902,6 +955,7 @@
             
             cell.onclick = () => {
                 state.selectedDate = new Date(dateObj);
+                populateFilteredCourseSelect();
                 renderApp();
             };
 
@@ -944,7 +998,7 @@
             return cell;
         }
 
-        // --- SCHEDULE LIST RENDERER (COURSES + SEPARATE "משימות" SECTION) ---
+        // --- SCHEDULE LIST RENDERER ---
         function renderSelectedDaySchedule() {
             const container = document.getElementById('scheduleList');
             container.innerHTML = '';
@@ -1095,6 +1149,126 @@
                 });
                 container.appendChild(tasksSection);
             }
+        }
+
+        // --- FAMILY TIME / BLOCKED HOURS MODAL (⚙️) ---
+        function openBlockedTimesModal() {
+            renderBlockedTimesModalDays();
+            document.getElementById('blockedTimesModal').classList.remove('hidden');
+        }
+
+        function closeBlockedTimesModal() {
+            document.getElementById('blockedTimesModal').classList.add('hidden');
+        }
+
+        function renderBlockedTimesModalDays() {
+            const container = document.getElementById('blockedTimesDaysContainer');
+            container.innerHTML = '';
+            const daysHe = ['יום ראשון (א\')', 'יום שני (ב\')', 'יום שלישי (ג\')', 'יום רביעי (ד\')', 'יום חמישי (ה\')', 'יום שישי (ו\')', 'יום שבת'];
+
+            for (let dayIdx = 0; dayIdx < 7; dayIdx++) {
+                const dayCard = document.createElement('div');
+                dayCard.className = 'bg-white p-3 rounded-2xl border border-slate-200 shadow-xs space-y-2';
+
+                const slots = state.blockedTimes[dayIdx] || [];
+
+                let slotsHtml = slots.map((s, slotIdx) => `
+                    <div class="flex items-center gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
+                        <span class="text-[11px] font-bold text-slate-600">מ-</span>
+                        <input type="time" value="${s.start}" onchange="state.blockedTimes[${dayIdx}][${slotIdx}].start = this.value" class="bg-white border border-slate-300 rounded-lg p-1 font-bold text-xs">
+                        <span class="text-[11px] font-bold text-slate-600">עד-</span>
+                        <input type="time" value="${s.end}" onchange="state.blockedTimes[${dayIdx}][${slotIdx}].end = this.value" class="bg-white border border-slate-300 rounded-lg p-1 font-bold text-xs">
+                        <button onclick="removeBlockedSlot(${dayIdx}, ${slotIdx})" class="text-red-500 hover:text-red-700 p-1 transition ml-auto">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                `).join('');
+
+                dayCard.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span class="font-extrabold text-slate-800 text-xs">${daysHe[dayIdx]}</span>
+                        <button onclick="addBlockedSlotRow(${dayIdx})" class="text-onoLimeDark hover:text-onoLimeLight font-black text-xs bg-slate-900 hover:bg-slate-800 text-white px-2 py-1 rounded-lg transition flex items-center gap-1">
+                            <i class="fa-solid fa-plus text-[10px]"></i> הוסף חלון
+                        </button>
+                    </div>
+                    <div class="space-y-1.5">
+                        ${slotsHtml || '<p class="text-[10px] text-slate-400 italic">אין שעות חסומות ביום זה</p>'}
+                    </div>
+                `;
+                container.appendChild(dayCard);
+            }
+        }
+
+        function addBlockedSlotRow(dayIdx) {
+            if (!state.blockedTimes[dayIdx]) state.blockedTimes[dayIdx] = [];
+            state.blockedTimes[dayIdx].push({ start: "18:00", end: "21:00" });
+            renderBlockedTimesModalDays();
+        }
+
+        function removeBlockedSlot(dayIdx, slotIdx) {
+            state.blockedTimes[dayIdx].splice(slotIdx, 1);
+            renderBlockedTimesModalDays();
+        }
+
+        function saveBlockedTimesSettings() {
+            saveData();
+            closeBlockedTimesModal();
+            showToast('הגדרות הזמנים החסומים נשמרו!');
+        }
+
+        // Check if a time interval overlaps with blocked family times for that day of week
+        function isTimeSlotBlocked(dateObj, startH, startM, durationMins) {
+            const dayOfWeek = dateObj.getDay();
+            const slots = state.blockedTimes[dayOfWeek] || [];
+            if (slots.length === 0) return false;
+
+            const slotStartMins = (startH * 60) + startM;
+            const slotEndMins = slotStartMins + durationMins;
+
+            for (let s of slots) {
+                const [bSH, bSM] = s.start.split(':').map(Number);
+                const [bEH, bEM] = s.end.split(':').map(Number);
+                const blockStartMins = (bSH * 60) + bSM;
+                const blockEndMins = (bEH * 60) + bEM;
+
+                // Overlap condition
+                if (slotStartMins < blockEndMins && slotEndMins > blockStartMins) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // --- FILTER COURSES BY SELECTED DATE ---
+        function populateFilteredCourseSelect() {
+            const select = document.getElementById('taskCourseSelect');
+            if (!select) return;
+            select.innerHTML = '';
+
+            const selectedISO = formatDateISO(state.selectedDate);
+
+            // Find course names active in events from selected date onwards
+            const activeCourseNames = new Set();
+            state.events.forEach(evt => {
+                if (evt.date >= selectedISO) {
+                    activeCourseNames.add(evt.course);
+                }
+            });
+
+            // Filter state.courses
+            let availableCourses = state.courses.filter(c => activeCourseNames.has(c.name) || c.id === 'general');
+
+            // Fallback if no specific course events match future dates
+            if (availableCourses.length <= 1) {
+                availableCourses = state.courses;
+            }
+
+            availableCourses.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = c.name;
+                select.appendChild(opt);
+            });
         }
 
         // --- COURSE DETAIL & LOCATION EDIT MODAL ---
@@ -1344,7 +1518,6 @@
             }
         }
 
-        // --- RESCHEDULE STEP AND SUBSEQUENT STEPS FORWARD ---
         function rescheduleTaskFromStep() {
             if (!state.activeModalTask || state.activeModalStepIdx < 0) return;
             const group = state.activeModalTask;
@@ -1379,7 +1552,7 @@
             showToast('מועדי השלב והשלבים שאחריו עודכנו בהצלחה!');
         }
 
-        // --- DYNAMIC TASK FORM CREATION & MANUAL COURSE ---
+        // --- DYNAMIC TASK FORM CREATION & MEMORIZATION ENHANCEMENTS ---
         function handleTaskTypeChange() {
             const type = document.getElementById('taskTypeSelect').value;
             const container = document.getElementById('dynamicTaskFields');
@@ -1427,25 +1600,46 @@
                 } else if (type === 'memorization') {
                     customArea.classList.add('hidden');
                     container.innerHTML = `
-                        <div class="space-y-2">
-                            <div class="flex items-center justify-between gap-2">
-                                <span class="text-xs font-bold text-slate-700">מספר המושגים:</span>
-                                <input type="number" id="memoConceptsCount" value="20" min="1" oninput="recalcMemoTotal()" class="w-16 bg-white border border-slate-300 rounded-lg p-1.5 text-center text-xs font-bold">
+                        <div class="space-y-3">
+                            <div class="text-xs font-black text-slate-800 border-b pb-1 flex items-center gap-1.5">
+                                <i class="fa-solid fa-list-check text-onoLimeDark"></i> שלבים מקדימים לשינון:
                             </div>
-                            <div class="flex items-center justify-between gap-2">
-                                <span class="text-xs font-bold text-slate-700">כמות החזרות:</span>
-                                <input type="number" id="memoRepsCount" value="3" min="1" oninput="recalcMemoTotal()" class="w-16 bg-white border border-slate-300 rounded-lg p-1.5 text-center text-xs font-bold">
+                            
+                            <!-- 3 Mandatory Preliminary Steps -->
+                            ${createStepInputRow('pre_quizlet', 'להכין כרטיסיות באפליקציית קוויזלט של הבוחן', 40)}
+                            ${createStepInputRow('pre_print_cards', 'להדפיס את כל הכרטיסיות', 10)}
+                            ${createStepInputRow('pre_print_slides', 'הדפסת מצגת תמונות פעמיים ומצגת עם הסברים פעם אחת', 15)}
+
+                            <div class="text-xs font-black text-slate-800 border-b pt-2 pb-1 flex items-center gap-1.5">
+                                <i class="fa-solid fa-brain text-amber-500"></i> הגדרת חלוקה לשינון וקבוצות מושגים:
                             </div>
-                            <div class="flex items-center justify-between gap-2">
-                                <span class="text-xs font-bold text-slate-700">דקות לכל מושג:</span>
-                                <input type="number" id="memoMinsPerConcept" value="2" min="1" oninput="recalcMemoTotal()" class="w-16 bg-white border border-slate-300 rounded-lg p-1.5 text-center text-xs font-bold">
+
+                            <div class="grid grid-cols-2 gap-2 bg-white p-2.5 rounded-xl border border-slate-200">
+                                <div>
+                                    <span class="text-[11px] font-bold text-slate-700 block mb-1">כמות מושגים כוללת:</span>
+                                    <input type="number" id="memoTotalConcepts" value="60" min="1" oninput="recalcMemoChunkDisplay()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-1.5 text-center text-xs font-bold">
+                                </div>
+                                <div>
+                                    <span class="text-[11px] font-bold text-slate-700 block mb-1">מושגים בקבוצה (מנה):</span>
+                                    <input type="number" id="memoBatchSize" value="20" min="1" oninput="recalcMemoChunkDisplay()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-1.5 text-center text-xs font-bold">
+                                </div>
+                                <div>
+                                    <span class="text-[11px] font-bold text-slate-700 block mb-1">כמות חזרות (סבבים):</span>
+                                    <input type="number" id="memoRepsCount" value="3" min="1" oninput="recalcMemoChunkDisplay()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-1.5 text-center text-xs font-bold">
+                                </div>
+                                <div>
+                                    <span class="text-[11px] font-bold text-slate-700 block mb-1">דקות לכל מושג:</span>
+                                    <input type="number" id="memoMinsPerConcept" value="2" min="1" oninput="recalcMemoChunkDisplay()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-1.5 text-center text-xs font-bold">
+                                </div>
                             </div>
-                            <div class="text-xs font-black text-slate-800 pt-2 border-t flex justify-between">
-                                <span>סך זמן שינון:</span>
-                                <span id="memoTotalDisplay" class="text-onoLimeDark font-black">120 דק'</span>
+
+                            <div class="text-[11px] font-bold text-slate-700 bg-amber-50 p-2 rounded-xl border border-amber-200 flex justify-between">
+                                <span>סיכום מנות שינון:</span>
+                                <span id="memoChunkDisplayInfo" class="text-amber-900 font-extrabold">3 קבוצות x 3 חזרות (40 דק' לקבוצה)</span>
                             </div>
                         </div>
                     `;
+                    recalcMemoChunkDisplay();
                 } else if (type === 'lesson_summary') {
                     customArea.classList.add('hidden');
                     container.innerHTML = createStepInputRow('step_summary', 'זמן לסיכום שיעור', 45);
@@ -1499,11 +1693,18 @@
             `;
         }
 
-        function recalcMemoTotal() {
-            const count = parseInt(document.getElementById('memoConceptsCount').value) || 0;
-            const reps = parseInt(document.getElementById('memoRepsCount').value) || 0;
-            const mins = parseInt(document.getElementById('memoMinsPerConcept').value) || 0;
-            document.getElementById('memoTotalDisplay').textContent = `${count * reps * mins} דק'`;
+        function recalcMemoChunkDisplay() {
+            const total = parseInt(document.getElementById('memoTotalConcepts').value) || 60;
+            const batch = parseInt(document.getElementById('memoBatchSize').value) || 20;
+            const reps = parseInt(document.getElementById('memoRepsCount').value) || 3;
+            const mins = parseInt(document.getElementById('memoMinsPerConcept').value) || 2;
+
+            const groupsCount = Math.ceil(total / batch);
+            const minsPerBatch = batch * mins;
+            const infoEl = document.getElementById('memoChunkDisplayInfo');
+            if (infoEl) {
+                infoEl.textContent = `${groupsCount} קבוצות מושגים x ${reps} חזרות (${minsPerBatch} דק' לקבוצה)`;
+            }
         }
 
         function generateAssignmentSubRows() {
@@ -1533,7 +1734,7 @@
             container.appendChild(tempDiv.firstElementChild);
         }
 
-        // --- SMART AUTO SCHEDULER PROPOSAL ---
+        // --- SMART AUTO SCHEDULER PROPOSAL & INTERACTIVE EDITING ---
         function generateSmartScheduleProposal() {
             const titleInput = document.getElementById('taskTitleInput');
             const title = titleInput.value.trim();
@@ -1562,18 +1763,55 @@
             const type = document.getElementById('taskTypeSelect').value;
 
             if (type === 'memorization') {
-                const count = parseInt(document.getElementById('memoConceptsCount').value) || 10;
-                const reps = parseInt(document.getElementById('memoRepsCount').value) || 2;
-                const mins = parseInt(document.getElementById('memoMinsPerConcept').value) || 2;
-                for (let r = 1; r <= reps; r++) {
-                    steps.push({ label: `שינון ${count} מושגים (סבב ${r})`, mins: count * mins });
+                // 1. Add Preliminary Steps
+                const inputs = document.querySelectorAll('.step-time-input');
+                inputs.forEach(input => {
+                    const label = input.getAttribute('data-step-label') || 'שלב מקדים';
+                    const mins = parseInt(input.value) || 20;
+                    steps.push({ label, mins });
+                });
+
+                // 2. Add Chunked Memorization Repetitions
+                const totalConcepts = parseInt(document.getElementById('memoTotalConcepts').value) || 60;
+                const batchSize = parseInt(document.getElementById('memoBatchSize').value) || 20;
+                const repsCount = parseInt(document.getElementById('memoRepsCount').value) || 3;
+                const minsPerConcept = parseInt(document.getElementById('memoMinsPerConcept').value) || 2;
+
+                const chunks = [];
+                let currentStart = 1;
+                while (currentStart <= totalConcepts) {
+                    let currentEnd = Math.min(currentStart + batchSize - 1, totalConcepts);
+                    chunks.push({
+                        start: currentStart,
+                        end: currentEnd,
+                        count: (currentEnd - currentStart + 1)
+                    });
+                    currentStart = currentEnd + 1;
                 }
+
+                // Loop for repetitions (3 times)
+                for (let r = 1; r <= repsCount; r++) {
+                    chunks.forEach(chunk => {
+                        const chunkMins = chunk.count * minsPerConcept;
+                        steps.push({
+                            label: `שינון מושגים ${chunk.start}-${chunk.end} (סבב ${r})`,
+                            mins: chunkMins
+                        });
+                    });
+                }
+
+                // Append Review Steps
+                steps.push({ label: 'חזרה יומית - שינון מושגים', mins: 20 });
+                steps.push({ label: 'חזרה מסכמת - יום לפני היעד', mins: 30 });
+
             } else if (type === 'exam_prep') {
                 const lessons = parseInt(document.getElementById('examLessonsCount').value) || 4;
                 const minsPerLec = parseInt(document.getElementById('examMinsPerLesson').value) || 40;
                 for (let l = 1; l <= lessons; l++) {
                     steps.push({ label: `חזרה על שיעור/נושא ${l}`, mins: minsPerLec });
                 }
+                steps.push({ label: 'חזרה יומית - לימוד למבחן', mins: 25 });
+                steps.push({ label: 'חזרה מסכמת - יום לפני הבחינה', mins: 45 });
             } else {
                 const inputs = document.querySelectorAll('.step-time-input');
                 inputs.forEach(input => {
@@ -1591,6 +1829,7 @@
             const remVal = parseInt(document.getElementById('newTaskReminderVal').value) || 30;
             const remUnit = document.getElementById('newTaskReminderUnit').value;
 
+            // Generate available days array
             const availableDays = [];
             let curr = new Date(startDate);
             while (curr <= dueDate) {
@@ -1602,22 +1841,36 @@
             let dayIdx = 0;
 
             steps.forEach((step, idx) => {
-                const assignedDate = new Date(availableDays[dayIdx % availableDays.length]);
+                let assignedDate = new Date(availableDays[dayIdx % availableDays.length]);
                 
-                const startHour = 16 + (idx % 3) * 1.5;
-                const startH = Math.floor(startHour);
-                const startM = (startHour % 1 === 0.5) ? '30' : '00';
-                
-                const endMins = (startH * 60) + parseInt(startM) + step.mins;
-                const endH = Math.floor(endMins / 60);
-                const endM = String(endMins % 60).padStart(2, '0');
+                // Smart slot calculation avoiding family time
+                let startHour = 16 + (idx % 3) * 1.5;
+                let startH = Math.floor(startHour);
+                let startM = (startHour % 1 === 0.5) ? 30 : 0;
+
+                // Adjust if time falls in blocked hours
+                while (isTimeSlotBlocked(assignedDate, startH, startM, step.mins)) {
+                    startH += 1;
+                    if (startH >= 22) {
+                        startH = 10; // Morning fallback
+                        dayIdx = (dayIdx + 1) % availableDays.length;
+                        assignedDate = new Date(availableDays[dayIdx]);
+                    }
+                }
+
+                const endMinsTotal = (startH * 60) + startM + step.mins;
+                const endH = Math.floor(endMinsTotal / 60);
+                const endM = endMinsTotal % 60;
+
+                const startStr = `${String(startH).padStart(2, '0')}:${String(startM).padStart(2, '0')}`;
+                const endStr = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
 
                 proposal.push({
                     stepName: step.label,
                     allocatedTime: step.mins,
                     date: assignedDate,
-                    startTime: `${String(startH).padStart(2, '0')}:${startM}`,
-                    endTime: `${String(endH).padStart(2, '0')}:${endM}`,
+                    startTime: startStr,
+                    endTime: endStr,
                     reminders: [{ val: remVal, unit: remUnit }]
                 });
 
@@ -1637,41 +1890,73 @@
                 items: proposal
             };
 
-            renderProposalUI(proposal);
+            renderProposalUI();
         }
 
-        function renderProposalUI(proposal) {
+        // Render Editable Proposal Items
+        function renderProposalUI() {
             const container = document.getElementById('proposalTimeline');
             container.innerHTML = '';
-            const daysHe = ['א\'', 'ב\'', 'ג\'', 'ד\'', 'ה\'', 'ו\'', 'שבת'];
+            if (!state.generatedProposal) return;
 
-            proposal.forEach((item) => {
-                const d = item.date;
-                const dateFormatted = `${d.getDate()}/${d.getMonth() + 1} (יום ${daysHe[d.getDay()]})`;
+            state.generatedProposal.items.forEach((item, idx) => {
+                const dateISO = formatDateISO(item.date);
 
                 const row = document.createElement('div');
-                row.className = 'bg-white p-2.5 rounded-xl border border-slate-200 text-xs flex items-center justify-between gap-2 shadow-xs';
+                row.className = 'bg-white p-2.5 rounded-xl border border-slate-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-xs';
+                
                 row.innerHTML = `
-                    <div class="flex items-center gap-2 overflow-hidden">
+                    <div class="flex items-center gap-2 overflow-hidden flex-1">
                         <span class="w-2.5 h-2.5 rounded-full bg-onoLimeDark shrink-0"></span>
                         <div class="truncate">
-                            <span class="font-extrabold text-slate-800">${item.stepName}</span>
-                            <span class="text-slate-500 block text-[10px] font-semibold">${item.startTime} - ${item.endTime} (${item.allocatedTime} דק')</span>
+                            <span class="font-extrabold text-slate-800 block text-xs truncate">${item.stepName}</span>
+                            <span class="text-slate-400 text-[10px] font-semibold">משך: ${item.allocatedTime} דק'</span>
                         </div>
                     </div>
-                    <div class="flex items-center gap-1 shrink-0">
-                        <span class="bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-bold px-1.5 py-0.5 rounded-md flex items-center gap-1">
-                            <i class="fa-solid fa-bell text-[9px]"></i>
-                            <span>${item.reminders[0].val} ${item.reminders[0].unit === 'days' ? 'ימים' : 'דק\''}</span>
-                        </span>
-                        <span class="bg-slate-100 text-slate-800 px-2 py-1 rounded-lg font-bold text-[11px]">${dateFormatted}</span>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <input type="date" value="${dateISO}" onchange="updateProposalItemDate(${idx}, this.value)" class="bg-slate-50 border border-slate-300 rounded-lg p-1 text-[11px] font-bold text-slate-800">
+                        <input type="time" value="${item.startTime}" onchange="updateProposalItemTime(${idx}, this.value)" class="bg-slate-50 border border-slate-300 rounded-lg p-1 text-[11px] font-bold text-slate-800">
                     </div>
                 `;
                 container.appendChild(row);
             });
 
             document.getElementById('scheduleProposalResult').classList.remove('hidden');
-            showToast('הצעת שיבוץ וזמנים נוצרה בהצלחה!');
+        }
+
+        // Automatic Shifting of Subsequent Items when changing date/time
+        function updateProposalItemDate(itemIdx, newDateStr) {
+            if (!state.generatedProposal || !newDateStr) return;
+            const newDate = new Date(newDateStr + 'T00:00:00');
+            const oldDate = new Date(state.generatedProposal.items[itemIdx].date);
+            const diffDays = Math.round((newDate - oldDate) / (1000 * 60 * 60 * 24));
+
+            state.generatedProposal.items[itemIdx].date = newDate;
+
+            // Shift subsequent steps forward
+            for (let i = itemIdx + 1; i < state.generatedProposal.items.length; i++) {
+                const target = state.generatedProposal.items[i];
+                const targetDate = new Date(target.date);
+                targetDate.setDate(targetDate.getDate() + diffDays);
+                target.date = targetDate;
+            }
+
+            renderProposalUI();
+            showToast('תאריך השלב והשלבים שאחריו עודכנו!');
+        }
+
+        function updateProposalItemTime(itemIdx, newTimeStr) {
+            if (!state.generatedProposal || !newTimeStr) return;
+            const item = state.generatedProposal.items[itemIdx];
+            item.startTime = newTimeStr;
+
+            const [sH, sM] = newTimeStr.split(':').map(Number);
+            const endMinsTotal = (sH * 60) + sM + item.allocatedTime;
+            const endH = Math.floor(endMinsTotal / 60);
+            const endM = endMinsTotal % 60;
+            item.endTime = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
+
+            renderProposalUI();
         }
 
         function saveTaskAndSchedule() {
@@ -1910,29 +2195,19 @@
         }
 
         // --- COURSE POPULATION & MODALS ---
-        function populateCourseSelect() {
-            const select = document.getElementById('taskCourseSelect');
-            select.innerHTML = '';
-            state.courses.forEach(c => {
-                const opt = document.createElement('option');
-                opt.value = c.id;
-                opt.textContent = c.name;
-                select.appendChild(opt);
-            });
-        }
-
         function addNewCoursePrompt() {
             const name = prompt('הכנס שם קורס חדש:');
             if (!name) return;
             const newCourse = { id: 'c_' + Date.now(), name: name, color: '#0284c7' };
             state.courses.push(newCourse);
             saveData();
-            populateCourseSelect();
+            populateFilteredCourseSelect();
             document.getElementById('taskCourseSelect').value = newCourse.id;
             showToast('קורס חדש נוסף');
         }
 
         function openAddTaskModal() {
+            populateFilteredCourseSelect();
             document.getElementById('addTaskModal').classList.remove('hidden');
             state.generatedProposal = null;
             document.getElementById('scheduleProposalResult').classList.add('hidden');
