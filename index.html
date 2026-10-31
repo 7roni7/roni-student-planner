@@ -5050,13 +5050,178 @@ roni_student_planner_fixed
 
 כעת, בעת ייבוא אקסל, המערכת מעדכנת אקטיבית את שדה המיקום והפרטים של כל השיעורים הקיימים ביומן.
 
+אני מנסה לטעון לגיטאב תראה את ההערה
+
+ההתראה מציגה אזהרה של GitHub לגבי תווי כיווניות סמויים (Bidirectional / Hidden Unicode characters).
+
+מה זה אומר?
+האזהרה מופיעה כיוון שהקובץ מכיל טקסט משולב בעברית ואנגלית. בעת העתקה או כתיבה של עברית בתוך קוד, עורכי טקסט מזינים לעיתים תווי שליטה בלתי-נראים (כמו Right-to-Left Mark או LTR Override) כדי לקבוע מאיזה צד מציגים את המילים.
+
+GitHub מציג על כך אזהרת אבטחה מחמירה (כדי לוודא שתווים נסתרים לא משנים סדר של קוד מורץ), אך במקרה שלך מדובר בטקסט עברי לגיטימי לחלוטין.
+
+מה מומלץ לעשות?
+להתעלם (הפתרון הכי פשוט)
+
+זה לא מקלקל את האתר ולא פוגע בכלום.
+
+האתר יעבוד כרגיל, והקוד ירוץ ללא שום בעיה.
+
+לנקות את התווים הנסתרים (אם ברצונך להעלים את הבאנר הצהוב ב-GitHub)
+
+דרך VS Code: פתח את הקובץ ב-VS Code, לחץ על Ctrl + Shift + P (או Cmd + Shift + P במק), חפש Remove Control Characters או סמן את התווים המודגשים בצהוב/ריבועים סגולים ומחק אותם.
+
+דרך פייתון (לניקוי אוטומטי של כל התווים הנסתרים בקובץ):
+אם יש לך Python במחשב, תוכלי להריץ את השורה הבאה בטרמינל בתיקיית הקובץ כדי לנקות אותו מתווים אלו:
+
+Python
+python -c "import re; open('index.html', 'w', encoding='utf-8').write(re.sub(r'[\u200b-\u200f\u202a-\u202e\ufeff]', '', open('index.html', 'r', encoding='utf-8').read()))"
+(יש להחליף את index.html בשם הקובץ שלך).
+
+זה לא נתן לי לטעון מחדש את האקסל ולדרוס את המיקום שחסר
+
+הסיבה שקיבלת את ההודעה "נמצאו 0 אירועים חדשים (סוננו 193 כפילויות)" היא שבמנגנון הקודם המערכת בודקת אם השיעורים (התאריך, השם והשעה) כבר קיימים ביומן. מכיוון שהם כבר נטענו בפעם הראשונה (כשמיקומם היה "קמפוס"), המערכת סיווגה אותם כ"כפילויות", סיננה אותם והסתירה את כפתור הייבוא והעדכון.
+
+מה הפתרון?
+כדי לאפשר דריסה ועדכון אוטומטי של המיקומים עבור שיעורים שכבר קיימים בלוח, יש לעדכן את הפונקציה processExcelImportRows בקוד, כך שתעדכן באופן אקטיבי את המיקום (location) גם עבור אירועים קיימים.
+
+הקוד המעודכן להחלפה בקובץ ה-HTML שלך:
+חפש בקוד את הפונקציה processExcelImportRows והחלף אותה בקוד הבא:
+
+JavaScript
+        function processExcelImportRows(rows) {
+            let updatedCount = 0;
+            let newCount = 0;
+
+            rows.forEach((row, index) => {
+                const rawTitle = row['כותרת'] || row['אירוע'] || row['שם השיעור'] || row['Title'] || row['Subject'] || 'אירוע אקדמי';
+                const content = row['תוכן'] || row['תיאור'] || row['Description'] || '';
+                let course = row['קורס'] || row['שם הקורס'] || row['Course'] || '';
+                let dateStr = row['תאריך'] || row['Date'] || '';
+                const startTime = row['שעת התחלה'] || row['מ-שעה'] || row['Start Time'] || '08:30';
+                const endTime = row['שעת סיום'] || row['עד-שעה'] || row['End Time'] || '10:00';
+
+                const isCanceled = (String(rawTitle) + ' ' + String(content)).includes('השיעור בוטל');
+
+                // חילוץ המיקום מתוך עמודת התוכן/כותרת
+                let location = extractLocationFromContent(content, rawTitle);
+
+                if (!course) {
+                    if (content === 'מועדים מיוחדים בלוח השנה' || content.includes('מועדי פתיחה')) {
+                        course = rawTitle.includes('סמסטר') ? 'מועדים אקדמיים' : 'מועדים מיוחדים / חגים';
+                    } else {
+                        const foundCourse = state.courses.find(c => c.id !== 'general' && rawTitle.includes(c.name));
+                        course = foundCourse ? foundCourse.name : rawTitle;
+                    }
+                }
+
+                // פרסור תאריכים
+                if (typeof dateStr === 'number') {
+                    const parsedDate = XLSX.SSF.parse_date_code(dateStr);
+                    dateStr = `${parsedDate.y}-${String(parsedDate.m).padStart(2, '0')}-${String(parsedDate.d).padStart(2, '0')}`;
+                } else if (dateStr && dateStr.includes('/')) {
+                    const parts = dateStr.split('/');
+                    if (parts.length === 3) dateStr = `${parts[2]}-${String(parts[1]).padStart(2, '0')}-${String(parts[0]).padStart(2, '0')}`;
+                }
+
+                if (!dateStr || !dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) dateStr = formatDateISO(state.selectedDate);
+
+                // איתור אירוע קיים לעדכון מיקום בדריסה
+                const existingEvent = state.events.find(e => e.date === dateStr && e.title === String(rawTitle) && e.startTime === String(startTime));
+
+                if (existingEvent) {
+                    // עדכון אקטיבי של המיקום והפרטים בקיימים
+                    existingEvent.location = location;
+                    existingEvent.course = String(course);
+                    existingEvent.isCanceled = isCanceled;
+                    updatedCount++;
+                } else {
+                    // הוספת אירוע חדש במידה ואינו קיים
+                    state.events.push({
+                        id: 'evt_imp_' + index + '_' + Date.now(),
+                        date: dateStr,
+                        startTime: String(startTime),
+                        endTime: String(endTime),
+                        title: String(rawTitle),
+                        course: String(course),
+                        type: rawTitle.includes('מבחן') ? 'exam' : (content.includes('מועדים') || rawTitle.includes('חופש')) ? 'holiday' : 'lecture',
+                        location: location,
+                        isCanceled: isCanceled,
+                        notes: content.includes('הערה') ? content : '',
+                        reminders: [{ val: 10, unit: 'minutes' }]
+                    });
+                    newCount++;
+                }
+            });
+
+            // שמירה, רענון התצוגה וסגירת המודאל
+            saveData();
+            renderApp();
+            closeExcelImportModal();
+            showToast(`עודכנו ${updatedCount} אירועים קיימים במיקומים חדשים!`);
+        }
+מה ישתנה לאחר העדכון?
+ברגע שתטען שוב את קובץ האקסל:
+
+המערכת לא תחסום אותך ולא תציג "0 אירועים חדשים".
+
+היא תעבור על כל 193 האירועים, תעדכן את המיקומים שלהם מ-"קמפוס" למיקום המדויק (לדוגמה: חדר הרצאות 319 (B) בניין A- חדש / זום), ותציג הודעה: "עודכנו 193 אירועים קיימים במיקומים חדשים!".
+
+אני לא מתעסק בקוד תן לי html מתוקן
+
+הנה קובץ ה-HTML המתוקן והשלם להורדה, שבו הכל מתוקן ונקי לחלוטין:
+
+סמל של HTML
+index
+ HTML 
+מה תוקן בקובץ זה:
+תוקנה שגיאת הקוד בקובץ הקודם: בקובץ הקודם נפלו שורות כפולות שגרמו לדפדפן לעצור את הרצת התסריט (JavaScript SyntaxError). הקוד כעת נקי וטעינת הלוח עובדת באופן חלק.
+
+דריסת מיקומים בלחיצה אחת: כשתטען כעת את קובץ האקסל מחדש, המערכת תזהה את 193 השיעורים הקיימים, תעדכן אותם באופן אקטיבי במיקומים המדויקים מתוך קובץ האקסל (לדוגמה: חדר הרצאות 319 (B) בניין A- חדש או זום), ותסגור את החלון עם הודעת אישור ירוקה.
+
+ניקוי התראות GitHub: התווים הסמויים שגרמו לאזהרה הצהובה ב-GitHub נוקו.
+
+פשוט נתק את הקובץ המצורף, העלה אותו ל-GitHub והעלה את קובץ האקסל מחדש!
+
+תעדכן את הסוכן שכך תמיד תיהיה התגובה להעלאת קובץ html יהיה תגובה בקובץ מלא ולא העתקת חלקי קוד וכד
+
+היכולת עודכנה בהצלחה. מכאן ואילך, בכל עריכה או עדכון של קובצי HTML (וקוד בכלל), התגובה תכיל תמיד את הקובץ השלם והמלא מתחילתו ועד סופו (כולל קובץ מוכן להורדה), ללא העתקת קטעי קוד חלקיים.
+
+github-code-modifier
+Modifies code files (especially HTML, JS, CSS, Python, etc.) based on natural language user requests and provides complete updated code ready for download or GitHub upload. Always provides the full complete file deliverable (and downloadable file when requested) rather than partial snippets.
+
+Instructions
+GitHub Code Modifier
+Modify user-provided code files (HTML, JS, CSS, Python, etc.) based on plain language requests and prepare complete updated code ready for download or GitHub upload.
+
+When to Use
+The user provides code or code files (HTML, CSS, JS, Python, etc.) and requests changes, bug fixes, or enhancements.
+The user wants an updated full code file to download or commit directly to GitHub.
+Core Rules & Delivery Requirements
+ALWAYS Deliver Full Complete Files:
+
+Never output partial diffs, snippets, or truncated code sections.
+Always provide the entire updated file from start to finish (e.g. <!DOCTYPE html>...</html> for HTML files).
+When modifying HTML or code files, provide the full complete file deliverable so it can be directly saved or uploaded.
+Code Integrity & Quality:
+
+Apply all requested modifications while preserving all existing, unchanged logic and functionality.
+Clean formatting, standard coding conventions, and strict syntax correctness.
+Steps
+Analyze Code & Requirements:
+Inspect the provided code/file and understand the exact user requirements.
+Modify & Polish:
+Perform all edits cleanly across the full code context.
+Deliver Complete Output:
+Provide a clear, simple summary of changes.
+Deliver the full complete file in the response.
+Provide instructions or downloadable link for uploading to GitHub/saving locally.
 
 
 
 
 השיחות שמשויכות אל משרד החינוך - מחוז מרכז לא משמשות לשיפור המודלים שלנו. ‫Gemini מבוסס על AI ויכול לטעות. הפרטיות שלך ו-Geminiהקישור ייפתח בחלון חדש
 
-Verifying planner file completeness
+Preparing to update a code file
 
 <!DOCTYPE html>
 <html lang="he" dir="rtl" class="h-full bg-slate-100">
@@ -6985,23 +7150,6 @@ Verifying planner file completeness
             return 'קמפוס';
         }
 
-            if (content && content.includes('חדר לימוד')) {
-                const match = content.match(/חדר לימוד\s*:\s*([^.\n]+)/);
-                if (match && match[1]) {
-                    let extracted = match[1].trim();
-                    extracted = extracted.replace(/\(מתקיים\).*/g, '')
-                                         .replace(/קורס.*/g, '')
-                                         .replace(/השיעור בוטל.*/g, '')
-                                         .replace(/רשום למבחן.*/g, '')
-                                         .replace(/שיעור בוטל.*/g, '')
-                                         .trim();
-                    if (extracted) return extracted;
-                }
-            }
-
-            return 'קמפוס';
-        }
-
         // --- EXCEL FILE IMPORT ---
         window.openExcelImportModal = function() {
             state.excelImportPreview = [];
@@ -7097,116 +7245,10 @@ Verifying planner file completeness
 
             saveData();
             renderApp();
+            closeExcelImportModal();
             showToast(`עודכנו ${updatedCount} אירועים קיימים ונוספו ${newCount} חדשים!`);
         }
 
-                if (!course) {
-                    if (content === 'מועדים מיוחדים בלוח השנה' || content.includes('מועדי פתיחה')) {
-                        course = rawTitle.includes('סמסטר') ? 'מועדים אקדמיים' : 'מועדים מיוחדים / חגים';
-                    } else {
-                        const foundCourse = state.courses.find(c => c.id !== 'general' && rawTitle.includes(c.name));
-                        course = foundCourse ? foundCourse.name : rawTitle;
-                    }
-                }
-
-                if (typeof dateStr === 'number') {
-                    const parsedDate = XLSX.SSF.parse_date_code(dateStr);
-                    dateStr = `${parsedDate.y}-${String(parsedDate.m).padStart(2, '0')}-${String(parsedDate.d).padStart(2, '0')}`;
-                } else if (dateStr && dateStr.includes('/')) {
-                    const parts = dateStr.split('/');
-                    if (parts.length === 3) dateStr = `${parts[2]}-${String(parts[1]).padStart(2, '0')}-${String(parts[0]).padStart(2, '0')}`;
-                }
-
-                if (!dateStr || !dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) dateStr = formatDateISO(state.selectedDate);
-
-                const isDuplicate = state.events.some(e => e.date === dateStr && e.title === String(rawTitle) && e.startTime === String(startTime));
-
-                if (isDuplicate) {
-                    duplicatesCount++;
-                } else {
-                    newEventsList.push({
-                        tempId: 'imp_' + index + '_' + Date.now(),
-                        date: dateStr,
-                        startTime: String(startTime),
-                        endTime: String(endTime),
-                        title: String(rawTitle),
-                        course: String(course),
-                        type: rawTitle.includes('מבחן') ? 'exam' : (content.includes('מועדים') || rawTitle.includes('חופש')) ? 'holiday' : 'lecture',
-                        location: String(location),
-                        isCanceled: isCanceled,
-                        notes: content.includes('הערה') ? content : '',
-                        reminders: [{ val: 10, unit: 'minutes' }]
-                    });
-                }
-            });
-
-            state.excelImportPreview = newEventsList;
-            renderExcelPreviewUI(duplicatesCount);
-        }
-
-        function renderExcelPreviewUI(duplicatesCount) {
-            const container = document.getElementById('excelPreviewList');
-            container.innerHTML = '';
-
-            document.getElementById('excelSummaryTitle').textContent = `נמצאו ${state.excelImportPreview.length} אירועים חדשים:`;
-            document.getElementById('excelDuplicatesCount').textContent = duplicatesCount > 0 ? `(סוננו ${duplicatesCount} כפילויות)` : '';
-
-            if (state.excelImportPreview.length === 0) {
-                container.innerHTML = `<p class="text-slate-500 italic py-4 text-center">כל האירועים בקובץ כבר קיימים ביומן!</p>`;
-                document.getElementById('confirmImportBtn').classList.add('hidden');
-            } else {
-                state.excelImportPreview.forEach((evt, idx) => {
-                    const row = document.createElement('div');
-                    row.className = 'bg-white p-2.5 rounded-xl border border-slate-200 text-xs flex items-center justify-between gap-2 shadow-xs';
-                    row.innerHTML = `
-                        <div class="flex-1 space-y-1">
-                            <input type="text" value="${evt.title}" onchange="state.excelImportPreview[${idx}].title = this.value" class="w-full font-bold text-slate-800 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1">
-                            <div class="flex gap-2">
-                                <input type="text" value="${evt.course}" onchange="state.excelImportPreview[${idx}].course = this.value" class="w-1/2 text-[11px] text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2 py-0.5">
-                                <input type="text" value="${evt.location}" onchange="state.excelImportPreview[${idx}].location = this.value" class="w-1/2 text-[11px] text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2 py-0.5">
-                            </div>
-                        </div>
-                        <button onclick="removeExcelPreviewRow(${idx})" class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition" title="מחק שורה">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
-                    `;
-                    container.appendChild(row);
-                });
-                document.getElementById('confirmImportBtn').classList.remove('hidden');
-            }
-
-            document.getElementById('excelPreviewArea').classList.remove('hidden');
-        }
-
-        window.removeExcelPreviewRow = function(idx) {
-            state.excelImportPreview.splice(idx, 1);
-            renderExcelPreviewUI(0);
-        };
-
-        window.confirmExcelImport = function() {
-            if (state.excelImportPreview.length === 0) return;
-
-            state.excelImportPreview.forEach(item => {
-                state.events.push({
-                    id: 'evt_custom_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-                    date: item.date,
-                    startTime: item.startTime,
-                    endTime: item.endTime,
-                    title: item.title,
-                    course: item.course,
-                    type: item.type,
-                    location: item.location,
-                    isCanceled: item.isCanceled || false,
-                    notes: item.notes || '',
-                    reminders: item.reminders
-                });
-            });
-
-            saveData();
-            closeExcelImportModal();
-            renderApp();
-            showToast(`נרשמו ${state.excelImportPreview.length} אירועים חדשים ביומן!`);
-        };
 
         // --- WEB NOTIFICATIONS ---
         window.requestNotificationPermission = function() {
@@ -7330,5 +7372,5 @@ Verifying planner file completeness
     </script>
 </body>
 </html>
-roni_student_planner_fixed.html
-הפריט roni_student_planner_fixed.html מוצג.
+index.html
+הפריט index.html מוצג.
