@@ -25,31 +25,7 @@
     <!-- SheetJS for Excel Reading -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
-    <!-- Firebase SDK Compat Libraries -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-
     <script>
-        // --- FIREBASE CONFIGURATION ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyBfmBVq0xbChK7f9hNT91RGGiuSGz6-oAw",
-            authDomain: "roni-student-planner.firebaseapp.com",
-            projectId: "roni-student-planner",
-            storageBucket: "roni-student-planner.firebasestorage.app",
-            messagingSenderId: "445035976281",
-            appId: "1:445035976281:web:a60fef6d4db5fe81e7c348",
-            measurementId: "G-ZM5HGZ2D16"
-        };
-
-        // Initialize Firebase
-        let db = null;
-        try {
-            firebase.initializeApp(firebaseConfig);
-            db = firebase.firestore();
-        } catch (e) {
-            console.error("Firebase init error:", e);
-        }
-
         tailwind.config = {
             theme: {
                 extend: {
@@ -222,9 +198,6 @@
             </div>
             <div class="flex items-center gap-1.5">
                 <span id="dayEventsCount" class="text-[11px] bg-slate-200 text-slate-700 font-extrabold px-2 py-0.5 rounded-full">0 אירועים</span>
-                <span id="cloudStatusIcon" class="text-[10px] text-amber-600 font-bold ml-1 flex items-center gap-1">
-                    <i class="fa-solid fa-cloud-arrow-up"></i> <span>מקומי בלבד</span>
-                </span>
                 <button onclick="toggleSheetExpand()" class="text-slate-500 hover:text-slate-800 p-1 transition">
                     <i id="expandSheetIcon" class="fa-solid fa-chevron-up text-xs"></i>
                 </button>
@@ -765,10 +738,10 @@
                 { id: 'c2', name: 'ניתוח מאמר מדעי וחיפוש במאגרי מידע', color: COURSE_COLORS['ניתוח מאמר מדעי וחיפוש במאגרי מידע'] },
                 { id: 'c3', name: 'אודיולוגיה בסיסית (א)', color: COURSE_COLORS['אודיולוגיה בסיסית (א)'] },
                 { id: 'c4', name: 'סטטיסטיקה למקצועות הבריאות', color: COURSE_COLORS['סטטיסטיקה למקצועות הבריאות'] },
-                { id: 'c5', name: "מבוא למדעים מדויקים ב'+ ג' - פיסיקה", color: COURSE_COLORS["מבוא למדעים מדויקים ב'+ ג' - פיסיקה"] },
+                { id: 'c5', name: 'מבוא למדעים מדויקים ב\'+ ג\' - פיסיקה', color: COURSE_COLORS['מבוא למדעים מדויקים ב\'+ ג\' - פיסיקה'] },
                 { id: 'c6', name: 'מבוא לבלשנות', color: COURSE_COLORS['מבוא לבלשנות'] },
                 { id: 'c7', name: 'התפתחות נורמאלית של שפה ודיבור (א)', color: COURSE_COLORS['התפתחות נורמאלית של שפה ודיבור (א)'] },
-                { id: 'c8', name: "מבוא לאנטומיה של האדם א'", color: COURSE_COLORS["מבוא לאנטומיה של האדם א'"] },
+                { id: 'c8', name: 'מבוא לאנטומיה של האדם א\'', color: COURSE_COLORS['מבוא לאנטומיה של האדם א\''] },
                 { id: 'c9', name: 'התנסות קלינית דיבור', color: COURSE_COLORS['התנסות קלינית דיבור'] },
                 { id: 'general', name: 'כללי', color: COURSE_COLORS['כללי'] }
             ],
@@ -791,7 +764,7 @@
             excelImportPreview: []
         };
 
-        // --- LOCAL STORAGE & FIREBASE REALTIME PERSISTENCE ---
+        // --- LOCAL STORAGE PERSISTENCE ---
         function loadSavedData() {
             try {
                 const savedGroups = localStorage.getItem('student_planner_groups_v7');
@@ -819,59 +792,6 @@
             } catch (e) {
                 console.error("Local storage write error:", e);
             }
-
-            // Realtime Sync to Firestore Cloud
-            if (db) {
-                db.collection("planner").doc("userData").set({
-                    events: state.events,
-                    taskGroups: state.taskGroups,
-                    courses: state.courses,
-                    blockedTimes: state.blockedTimes,
-                    lastUpdated: new Date().toISOString()
-                }).then(() => {
-                    updateCloudStatusUI(true);
-                }).catch(err => {
-                    console.error("Firestore save error:", err);
-                    updateCloudStatusUI(false);
-                });
-            }
-        }
-
-        function initFirebaseSync() {
-            if (!db) {
-                updateCloudStatusUI(false);
-                return;
-            }
-
-            db.collection("planner").doc("userData").onSnapshot((doc) => {
-                if (doc.exists) {
-                    const data = doc.data();
-                    if (data.events) state.events = data.events;
-                    if (data.taskGroups) state.taskGroups = data.taskGroups;
-                    if (data.courses && data.courses.length > 0) state.courses = data.courses;
-                    if (data.blockedTimes) state.blockedTimes = data.blockedTimes;
-                    
-                    updateCloudStatusUI(true);
-                    renderApp();
-                } else {
-                    saveData();
-                }
-            }, (err) => {
-                console.error("Firestore sync error:", err);
-                updateCloudStatusUI(false);
-            });
-        }
-
-        function updateCloudStatusUI(isSynced) {
-            const el = document.getElementById('cloudStatusIcon');
-            if (!el) return;
-            if (isSynced) {
-                el.className = "text-[10px] text-emerald-600 font-bold ml-1 flex items-center gap-1";
-                el.innerHTML = '<i class="fa-solid fa-cloud-check"></i> <span>מסונכרן ענן</span>';
-            } else {
-                el.className = "text-[10px] text-amber-600 font-bold ml-1 flex items-center gap-1";
-                el.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> <span>מקומי בלבד</span>';
-            }
         }
 
         // --- INITIALIZATION ---
@@ -888,9 +808,6 @@
             populateFilteredCourseSelect();
             handleTaskTypeChange();
             renderApp();
-
-            // Initialize Cloud Sync with Firebase
-            initFirebaseSync();
         };
 
         function renderApp() {
@@ -953,7 +870,7 @@
         }
 
         function renderHeaderTitle() {
-            const monthsShortHe = ["ינו'", "פבר'", "מרץ", "אפר'", "מאי", "יוני", "יולי", "אוג'", "ספט'", "אוק'", "נוב'", "דצמ'"];
+            const monthsShortHe = ['ינו\'', 'פבר\'', 'מרץ', 'אפר\'', 'מאי', 'יוני', 'יולי', 'אוג\'', 'ספט\'', 'אוק\'', 'נוב\'', 'דצמ\''];
             const titleEl = document.getElementById('calendarTitle');
             const monthName = monthsShortHe[state.currentDate.getMonth()];
             const year = state.currentDate.getFullYear();
@@ -1247,7 +1164,7 @@
         function renderBlockedTimesModalDays() {
             const container = document.getElementById('blockedTimesDaysContainer');
             container.innerHTML = '';
-            const daysHe = ["יום ראשון (א')", "יום שני (ב')", "יום שלישי (ג')", "יום רביעי (ד')", "יום חמישי (ה')", "יום שישי (ו')", "יום שבת"];
+            const daysHe = ['יום ראשון (א\')', 'יום שני (ב\')', 'יום שלישי (ג\')', 'יום רביעי (ד\')', 'יום חמישי (ה\')', 'יום שישי (ו\')', 'יום שבת'];
 
             for (let dayIdx = 0; dayIdx < 7; dayIdx++) {
                 const dayCard = document.createElement('div');
@@ -1299,6 +1216,7 @@
             showToast('הגדרות הזמנים החסומים נשמרו!');
         }
 
+        // Check if a time interval overlaps with blocked family times for that day of week
         function isTimeSlotBlocked(dateObj, startH, startM, durationMins) {
             const dayOfWeek = dateObj.getDay();
             const slots = state.blockedTimes[dayOfWeek] || [];
@@ -1313,6 +1231,7 @@
                 const blockStartMins = (bSH * 60) + bSM;
                 const blockEndMins = (bEH * 60) + bEM;
 
+                // Overlap condition
                 if (slotStartMins < blockEndMins && slotEndMins > blockStartMins) {
                     return true;
                 }
@@ -1328,6 +1247,7 @@
 
             const selectedISO = formatDateISO(state.selectedDate);
 
+            // Find course names active in events from selected date onwards
             const activeCourseNames = new Set();
             state.events.forEach(evt => {
                 if (evt.date >= selectedISO) {
@@ -1335,8 +1255,10 @@
                 }
             });
 
+            // Filter state.courses
             let availableCourses = state.courses.filter(c => activeCourseNames.has(c.name) || c.id === 'general');
 
+            // Fallback if no specific course events match future dates
             if (availableCourses.length <= 1) {
                 availableCourses = state.courses;
             }
@@ -1402,7 +1324,7 @@
 
         // --- REMINDERS FORMATTING & MANAGEMENT ---
         function formatReminderText(r) {
-            const unitHe = r.unit === 'days' ? 'ימים' : r.unit === 'hours' ? 'שעות' : "דק'";
+            const unitHe = r.unit === 'days' ? 'ימים' : r.unit === 'hours' ? 'שעות' : 'דק\'';
             return `התראה ${r.val} ${unitHe} לפני`;
         }
 
