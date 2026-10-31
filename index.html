@@ -275,9 +275,14 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-black text-slate-700 mb-1.5 flex items-center gap-1.5">
-                        <i class="fa-solid fa-location-dot text-onoLimeDark"></i> מיקום השיעור (ניתן לעריכה חופשית):
-                    </label>
+                    <div class="flex justify-between items-center mb-1.5">
+                        <label class="block text-xs font-black text-slate-700 flex items-center gap-1.5">
+                            <i class="fa-solid fa-location-dot text-onoLimeDark"></i> מיקום השיעור (ניתן לעריכה חופשית):
+                        </label>
+                        <a href="https://navi.ono.ac.il/" target="_blank" class="text-[11px] font-bold text-onoLimeDark hover:underline flex items-center gap-1">
+                            <i class="fa-solid fa-compass"></i> אתר ניווט מכללה
+                        </a>
+                    </div>
                     <input type="text" id="courseLocationInput" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-bold text-slate-800 focus:ring-2 focus:ring-onoLime focus:outline-none text-xs">
                 </div>
 
@@ -615,7 +620,6 @@
 
         // --- FIREBASE REALTIME SYNC & LOCAL PERSISTENCE ---
         function initFirebaseRealtimeSync() {
-            // Read from LocalStorage initially for immediate display
             try {
                 const savedGroups = localStorage.getItem('student_planner_groups_v7');
                 if (savedGroups) state.taskGroups = JSON.parse(savedGroups);
@@ -632,7 +636,6 @@
                 console.error("Local storage error:", e);
             }
 
-            // Sync with Firestore Cloud in Real-time
             onSnapshot(userDocRef, (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
@@ -641,7 +644,6 @@
                     if (data.events) state.events = data.events;
                     if (data.blockedTimes) state.blockedTimes = data.blockedTimes;
                     
-                    // Save to local cache
                     localStorage.setItem('student_planner_groups_v7', JSON.stringify(state.taskGroups));
                     localStorage.setItem('student_planner_courses_v7', JSON.stringify(state.courses));
                     localStorage.setItem('student_planner_events_v7', JSON.stringify(state.events));
@@ -655,7 +657,6 @@
         }
 
         window.saveData = async function() {
-            // 1. Save locally
             try {
                 localStorage.setItem('student_planner_groups_v7', JSON.stringify(state.taskGroups));
                 localStorage.setItem('student_planner_courses_v7', JSON.stringify(state.courses));
@@ -665,7 +666,6 @@
                 console.error("Local storage write error:", e);
             }
 
-            // 2. Sync to Firebase Cloud Firestore
             try {
                 await setDoc(userDocRef, {
                     taskGroups: state.taskGroups,
@@ -994,10 +994,11 @@
                                 ${isHoliday ? '<span class="bg-purple-100 text-purple-800 text-[10px] font-black px-2 py-0.5 rounded-md">מועד מיוחד</span>' : ''}
                                 <span class="font-bold text-slate-800 text-xs sm:text-sm leading-tight ${isCanceled ? 'line-through text-red-800' : ''}">${evt.title}</span>
                             </div>
-                            <div class="text-xs text-slate-600 flex items-center gap-1.5 mb-1 font-medium">
-                                <i class="fa-solid fa-location-dot text-slate-400"></i>
-                                <span>${evt.location}</span>
-                            </div>
+                            <a href="https://navi.ono.ac.il/" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="text-xs text-slate-600 flex items-center gap-1.5 mb-1 font-medium hover:text-onoLimeDark transition w-max group" title="לחץ לניווט במכללה">
+                                <i class="fa-solid fa-location-dot text-slate-400 group-hover:text-onoLimeDark transition"></i>
+                                <span class="underline decoration-slate-300 underline-offset-2 group-hover:decoration-onoLimeDark">${evt.location}</span>
+                                <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-slate-400 group-hover:text-onoLimeDark"></i>
+                            </a>
                             ${evt.notes ? `<div class="text-[11px] text-amber-900 font-medium italic mb-1">הערה: ${evt.notes}</div>` : ''}
                             <div class="text-[11px] text-slate-500 font-semibold mb-1">קורס: ${evt.course}</div>
                             <div class="flex flex-wrap gap-1 mt-1">${remLabel}</div>
@@ -1883,6 +1884,32 @@
             showToast('המשימה והשלבים שובצו ביומן!');
         };
 
+        // --- EXCEL LOCATION EXTRACTION LOGIC ---
+        function extractLocationFromContent(content, title) {
+            const combinedText = ((content || '') + ' ' + (title || '')).trim();
+            if (!combinedText) return 'קמפוס';
+
+            if (/zoom|זום/i.test(combinedText)) {
+                return 'זום';
+            }
+
+            if (content && content.includes('חדר לימוד')) {
+                const match = content.match(/חדר לימוד\s*:\s*([^.\n]+)/);
+                if (match && match[1]) {
+                    let extracted = match[1].trim();
+                    extracted = extracted.replace(/\(מתקיים\).*/g, '')
+                                         .replace(/קורס.*/g, '')
+                                         .replace(/השיעור בוטל.*/g, '')
+                                         .replace(/רשום למבחן.*/g, '')
+                                         .replace(/שיעור בוטל.*/g, '')
+                                         .trim();
+                    if (extracted) return extracted;
+                }
+            }
+
+            return 'קמפוס';
+        }
+
         // --- EXCEL FILE IMPORT ---
         window.openExcelImportModal = function() {
             state.excelImportPreview = [];
@@ -1921,12 +1948,28 @@
             const newEventsList = [];
 
             rows.forEach((row, index) => {
-                const title = row['כותרת'] || row['אירוע'] || row['שם השיעור'] || row['Title'] || row['Subject'] || 'אירוע אקדמי';
-                const course = row['קורס'] || row['שם הקורס'] || row['Course'] || 'כללי';
+                const rawTitle = row['כותרת'] || row['אירוע'] || row['שם השיעור'] || row['Title'] || row['Subject'] || 'אירוע אקדמי';
+                const content = row['תוכן'] || row['תיאור'] || row['Description'] || '';
+                let course = row['קורס'] || row['שם הקורס'] || row['Course'] || '';
                 let dateStr = row['תאריך'] || row['Date'] || '';
                 const startTime = row['שעת התחלה'] || row['מ-שעה'] || row['Start Time'] || '08:30';
                 const endTime = row['שעת סיום'] || row['עד-שעה'] || row['End Time'] || '10:00';
-                const location = row['מיקום'] || row['חדר'] || row['Location'] || 'קמפוס';
+
+                const isCanceled = (String(rawTitle) + ' ' + String(content)).includes('השיעור בוטל');
+
+                let location = row['מיקום'] || row['חדר'] || row['Location'] || '';
+                if (!location || location === 'קמפוס') {
+                    location = extractLocationFromContent(content, rawTitle);
+                }
+
+                if (!course) {
+                    if (content === 'מועדים מיוחדים בלוח השנה' || content.includes('מועדי פתיחה')) {
+                        course = rawTitle.includes('סמסטר') ? 'מועדים אקדמיים' : 'מועדים מיוחדים / חגים';
+                    } else {
+                        const foundCourse = state.courses.find(c => c.id !== 'general' && rawTitle.includes(c.name));
+                        course = foundCourse ? foundCourse.name : rawTitle;
+                    }
+                }
 
                 if (typeof dateStr === 'number') {
                     const parsedDate = XLSX.SSF.parse_date_code(dateStr);
@@ -1938,7 +1981,7 @@
 
                 if (!dateStr || !dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) dateStr = formatDateISO(state.selectedDate);
 
-                const isDuplicate = state.events.some(e => e.date === dateStr && e.title === title && e.startTime === startTime);
+                const isDuplicate = state.events.some(e => e.date === dateStr && e.title === String(rawTitle) && e.startTime === String(startTime));
 
                 if (isDuplicate) {
                     duplicatesCount++;
@@ -1948,10 +1991,12 @@
                         date: dateStr,
                         startTime: String(startTime),
                         endTime: String(endTime),
-                        title: String(title),
+                        title: String(rawTitle),
                         course: String(course),
-                        type: title.includes('מבחן') ? 'exam' : title.includes('חופש') ? 'holiday' : 'lecture',
+                        type: rawTitle.includes('מבחן') ? 'exam' : (content.includes('מועדים') || rawTitle.includes('חופש')) ? 'holiday' : 'lecture',
                         location: String(location),
+                        isCanceled: isCanceled,
+                        notes: content.includes('הערה') ? content : '',
                         reminders: [{ val: 10, unit: 'minutes' }]
                     });
                 }
@@ -1980,7 +2025,7 @@
                             <input type="text" value="${evt.title}" onchange="state.excelImportPreview[${idx}].title = this.value" class="w-full font-bold text-slate-800 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1">
                             <div class="flex gap-2">
                                 <input type="text" value="${evt.course}" onchange="state.excelImportPreview[${idx}].course = this.value" class="w-1/2 text-[11px] text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2 py-0.5">
-                                <input type="date" value="${evt.date}" onchange="state.excelImportPreview[${idx}].date = this.value" class="w-1/2 text-[11px] text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2 py-0.5">
+                                <input type="text" value="${evt.location}" onchange="state.excelImportPreview[${idx}].location = this.value" class="w-1/2 text-[11px] text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2 py-0.5">
                             </div>
                         </div>
                         <button onclick="removeExcelPreviewRow(${idx})" class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition" title="מחק שורה">
@@ -2013,6 +2058,8 @@
                     course: item.course,
                     type: item.type,
                     location: item.location,
+                    isCanceled: item.isCanceled || false,
+                    notes: item.notes || '',
                     reminders: item.reminders
                 });
             });
