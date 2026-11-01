@@ -1,1212 +1,1332 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl" class="h-full bg-slate-100">
+<html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta id="themeColorMeta" name="theme-color" content="#a8d100">
-    <meta name="description" content="רוני סטודנט פלאנר - ניהול עומסי לימודים, מערכת שעות ומשימות לסטודנטים">
-    
-    <title>רוני סטודנט פלאנר</title>
-
-    <!-- Dynamic PWA Manifest Link -->
-    <link id="manifestLink" rel="manifest">
-    
-    <!-- Favicon -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><path fill='%23a8d100' d='M0 0h512v512H0z'/><path fill='%230f172a' d='M256 120L32 216l224 96 176-75.4V360h32V216L256 120z'/></svg>">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>רוני סטודנט פלאנר - Roni Student Planner</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Font Rubik -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- React & ReactDOM UMD -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <!-- Babel Standalone -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Google Fonts Rubik & Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- SheetJS for Excel Reading -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        onoLime: '#a8d100',
-                        onoLimeDark: '#8ea800',
-                        onoLimeLight: '#d4f238',
-                        onoDark: '#0f172a'
-                    },
-                    fontFamily: {
-                        sans: ['Rubik', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
-
     <style>
-        :root {
-            --brand-primary: #a8d100;
-            --brand-dark: #8ea800;
-            --brand-light: #d4f238;
-        }
-
-        /* Dynamic Theme Custom Colors Overrides */
-        .bg-onoLime { background-color: var(--brand-primary) !important; }
-        .bg-onoLimeDark { background-color: var(--brand-dark) !important; }
-        .bg-onoLimeLight { background-color: var(--brand-light) !important; }
-        .text-onoLime { color: var(--brand-primary) !important; }
-        .text-onoLimeDark { color: var(--brand-dark) !important; }
-        .border-onoLime { border-color: var(--brand-primary) !important; }
-        .border-onoLimeDark { border-color: var(--brand-dark) !important; }
-
-        * {
-            box-sizing: border-box;
-            touch-action: manipulation;
-        }
         body {
-            font-family: 'Rubik', sans-serif;
-            background-color: #f8fafc;
+            font-family: 'Rubik', system-ui, -apple-system, sans-serif;
+            background-color: #f1f5f9;
+            color: #0f172a;
             user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            margin: 0;
-            padding: 0;
-            height: 100%;
         }
+        /* Custom scrollbar styling */
         ::-webkit-scrollbar {
-            width: 4px;
-            height: 4px;
+            width: 6px;
+            height: 6px;
         }
         ::-webkit-scrollbar-track {
             background: #f1f5f9;
         }
         ::-webkit-scrollbar-thumb {
             background: #cbd5e1;
-            border-radius: 4px;
+            border-radius: 9999px;
         }
-        .day-cell {
-            min-height: 48px;
-        }
-        .animate-pop {
-            animation: pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        @keyframes pop {
-            0% { transform: scale(0.95); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        .canceled-course-card {
-            background-color: rgba(239, 68, 68, 0.12) !important;
-            border-right: 6px solid #ef4444 !important;
-        }
-        .manual-course-card {
-            background-color: rgba(254, 240, 138, 0.75) !important;
-            border-right: 6px solid #eab308 !important;
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
         }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-800 antialiased h-full flex flex-col justify-between">
+<body class="min-h-screen bg-slate-100 antialiased selection:bg-[#aed500] selection:text-[#162238]">
+    <div id="root"></div>
 
-    <!-- Container -->
-    <div class="w-full max-w-md mx-auto bg-white min-h-full flex flex-col relative overflow-hidden shadow-none sm:shadow-2xl sm:rounded-3xl sm:my-2">
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
 
-        <!-- HEADER BAR -->
-        <header class="bg-onoLime text-slate-900 px-3.5 py-3 sticky top-0 z-30 shadow-xs shrink-0 flex flex-col gap-2 transition-colors duration-300">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-xl bg-slate-900 text-onoLime flex items-center justify-center font-black text-sm shadow-xs">
-                        <i class="fa-solid fa-graduation-cap"></i>
-                    </div>
-                    <h1 class="text-sm sm:text-base font-black tracking-tight">רוני סטודנט פלאנר</h1>
-                </div>
+        // Custom SVG Icon Helper Components
+        const IconGraduationCap = ({ className = "w-5 h-5" }) => (
+            <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l9-5-9-5-9 5 9 5zm0 0v6" />
+            </svg>
+        );
 
-                <div class="flex items-center gap-1.5">
-                    <button onclick="openBlockedTimesModal()" class="bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold p-2 rounded-xl transition flex items-center justify-center shadow-xs" title="הגדרות צבע והגדרת זמנים חסומים">
-                        <i class="fa-solid fa-gear text-onoLime text-xs"></i>
-                    </button>
+        const IconBell = ({ className = "w-4 h-4" }) => (
+            <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+        );
 
-                    <button id="pwaInstallBtn" onclick="installPWA()" class="hidden bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold px-2 py-1.5 rounded-xl transition flex items-center gap-1 shadow-xs animate-bounce">
-                        <i class="fa-solid fa-mobile-screen-button text-onoLime text-xs"></i>
-                        <span>📲 התקן</span>
-                    </button>
+        const IconFileExcel = ({ className = "w-4 h-4" }) => (
+            <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+        );
 
-                    <button onclick="openExcelImportModal()" class="bg-slate-900/90 hover:bg-slate-900 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-xl transition flex items-center gap-1 shadow-xs">
-                        <i class="fa-solid fa-file-excel text-onoLime text-xs"></i>
-                        <span>ייבוא</span>
-                    </button>
+        const IconGear = ({ className = "w-4 h-4" }) => (
+            <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+        );
 
-                    <button onclick="requestNotificationPermission()" id="notifBtn" class="bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-xl transition flex items-center gap-1 shadow-xs">
-                        <i class="fa-solid fa-bell text-onoLime text-xs"></i>
-                        <span>התראות</span>
-                    </button>
-                </div>
-            </div>
+        const IconCalendar = ({ className = "w-4 h-4" }) => (
+            <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+        );
 
-            <!-- Calendar Navigation Row -->
-            <div class="flex items-center justify-between pt-1 border-t border-slate-900/10">
-                <button id="viewToggleBtn" onclick="toggleCalendarView()" class="p-1.5 text-slate-900 hover:bg-black/10 rounded-xl transition flex items-center gap-1 text-xs font-bold">
-                    <i id="viewToggleIcon" class="fa-solid fa-calendar-week text-sm"></i>
-                    <span id="viewToggleLabel">שבועי</span>
-                </button>
+        const IconCalendarCheck = ({ className = "w-5 h-5" }) => (
+            <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+        );
 
-                <div class="flex items-center gap-2">
-                    <button onclick="navigateDate(-1)" class="p-1.5 hover:bg-black/10 rounded-full transition" title="אחורה">
-                        <i class="fa-solid fa-chevron-right text-sm"></i>
-                    </button>
+        const IconChevronLeft = ({ className = "w-4 h-4" }) => (
+            <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+        );
 
-                    <button onclick="openMonthYearPickerModal()" class="text-sm font-black text-slate-900 hover:bg-black/10 px-2 py-1 rounded-xl transition flex items-center gap-1.5">
-                        <span id="calendarTitle">נוב' 2026</span>
-                        <i class="fa-solid fa-caret-down text-xs text-slate-700"></i>
-                    </button>
+        const IconChevronRight = ({ className = "w-4 h-4" }) => (
+            <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+        );
 
-                    <button onclick="navigateDate(1)" class="p-1.5 hover:bg-black/10 rounded-full transition" title="קדימה">
-                        <i class="fa-solid fa-chevron-left text-sm"></i>
-                    </button>
-                </div>
+        const IconChevronDown = ({ className = "w-4 h-4" }) => (
+            <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+        );
 
-                <button onclick="goToToday()" class="p-1.5 text-slate-900 hover:bg-black/10 rounded-xl transition flex items-center gap-1 text-xs font-bold">
-                    <i class="fa-solid fa-calendar-day text-sm"></i>
-                    <span>היום</span>
-                </button>
-            </div>
+        const IconChevronUp = ({ className = "w-4 h-4" }) => (
+            <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+            </svg>
+        );
 
-            <div class="grid grid-cols-7 text-center font-black text-[11px] text-slate-900 pt-1">
-                <div>יום א'</div>
-                <div>יום ב'</div>
-                <div>יום ג'</div>
-                <div>יום ד'</div>
-                <div>יום ה'</div>
-                <div>יום ו'</div>
-                <div>שבת</div>
-            </div>
-        </header>
+        const IconPlus = ({ className = "w-6 h-6" }) => (
+            <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+        );
 
-        <!-- CALENDAR GRID CONTAINER -->
-        <div id="calendarGrid" class="bg-white p-2 border-b border-slate-200 shrink-0"></div>
+        const IconTrash = ({ className = "w-4 h-4" }) => (
+            <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+        );
 
-        <!-- SELECTED DAY HEADER -->
-        <div class="bg-slate-100/90 border-t border-b border-slate-200/90 px-4 py-2 flex justify-between items-center z-10 sticky top-[112px] shrink-0 backdrop-blur-xs">
-            <div class="flex items-center gap-2">
-                <i class="fa-regular fa-calendar-check text-onoLimeDark text-sm"></i>
-                <span id="selectedDateTitle" class="font-bold text-slate-800 text-xs sm:text-sm">יום שלישי 17 נובמבר 2026</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-                <span id="dayEventsCount" class="text-[11px] bg-slate-200 text-slate-700 font-extrabold px-2 py-0.5 rounded-full">0 אירועים</span>
-                <button onclick="toggleSheetExpand()" class="text-slate-500 hover:text-slate-800 p-1 transition">
-                    <i id="expandSheetIcon" class="fa-solid fa-chevron-up text-xs"></i>
-                </button>
-            </div>
-        </div>
+        const IconEdit = ({ className = "w-4 h-4" }) => (
+            <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+        );
 
-        <!-- SCHEDULE PANEL -->
-        <main id="scheduleList" class="flex-1 overflow-y-auto p-3.5 space-y-4 bg-slate-50/70 pb-20"></main>
+        const IconMapPin = ({ className = "w-4 h-4" }) => (
+            <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+        );
 
-        <!-- FLOATING TASK ADD BUTTON (+) -->
-        <button onclick="openAddTaskModal()" class="fixed sm:absolute bottom-5 left-5 z-40 bg-onoLime hover:bg-onoLimeDark text-slate-900 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-2xl font-black transition-transform transform active:scale-90 border-2 border-white focus:outline-none">
-            <i class="fa-solid fa-plus"></i>
-        </button>
+        const IconClock = ({ className = "w-4 h-4" }) => (
+            <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        );
 
-    </div>
+        const IconCheck = ({ className = "w-4 h-4" }) => (
+            <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+        );
 
-    <!-- SETTINGS & BLOCKED HOURS MODAL -->
-    <div id="blockedTimesModal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs hidden flex items-center justify-center p-3 sm:p-4">
-        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-pop border border-slate-100">
-            <div class="bg-slate-900 text-white px-5 py-3.5 flex justify-between items-center shrink-0 border-b border-slate-800">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-sliders text-onoLime text-lg"></i>
-                    <h2 class="text-sm font-black">הגדרות מערכת וזמנים חסומים</h2>
-                </div>
-                <button onclick="closeBlockedTimesModal()" class="text-slate-400 hover:text-white transition">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-            
-            <div class="p-4 overflow-y-auto space-y-4 text-xs flex-1 bg-slate-50">
-                <!-- THEME COLOR PICKER -->
-                <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs space-y-2">
-                    <label class="block text-xs font-black text-slate-800 flex items-center gap-1.5">
-                        <i class="fa-solid fa-palette text-onoLimeDark"></i> בחירת צבע ערכת נושא (רקע וכפתורים):
-                    </label>
-                    <div class="flex items-center gap-3 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                        <input type="color" id="themeColorPicker" value="#a8d100" onchange="applyCustomThemeColor(this.value)" class="w-10 h-10 rounded-xl border-0 cursor-pointer shadow-xs">
-                        <div class="flex-1 text-[11px]">
-                            <span class="font-extrabold text-slate-800 block">צבע ראשי למערכת</span>
-                            <span class="text-slate-500">משנה את הרקע הירוק, כפתורים מובילים וסמנים ביומן</span>
-                        </div>
-                        <button onclick="resetThemeColor()" class="text-[11px] font-bold text-slate-600 bg-slate-200 hover:bg-slate-300 px-2.5 py-1.5 rounded-xl transition">איפוס</button>
-                    </div>
-                </div>
+        const IconX = ({ className = "w-5 h-5" }) => (
+            <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+        );
 
-                <div class="space-y-2">
-                    <div class="font-black text-slate-800 text-xs flex items-center gap-1.5">
-                        <i class="fa-solid fa-clock-slash text-amber-500"></i> הגדרת זמן משפחה / שעות חסומות:
-                    </div>
-                    <p class="text-[11px] text-slate-600 bg-amber-50 p-2.5 rounded-xl border border-amber-200">
-                        <i class="fa-solid fa-circle-info text-amber-600"></i>
-                        הזמנים שתגדיר כאן לא יופיעו ביומן, אך המערכת תימנע באופן מוחלט משיבוץ משימות בשעות אלו.
-                    </p>
-                    <div id="blockedTimesDaysContainer" class="space-y-3"></div>
-                </div>
-            </div>
+        // Date and Hebrew Helper Constants
+        const HEBREW_DAYS_SHORT = ['יום א\'', 'יום ב\'', 'יום ג\'', 'יום ד\'', 'יום ה\'', 'יום ו\'', 'שבת'];
+        const HEBREW_DAYS_FULL = ['יום ראשון', 'יום שני', 'יום שלישי', 'יום רביעי', 'יום חמישי', 'יום שישי', 'יום שבת'];
+        const HEBREW_MONTHS = ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני', 'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'];
+        const HEBREW_MONTHS_SHORT = ['ינו\'', 'פבר\'', 'מרץ', 'אפר\'', 'מאי', 'יוני', 'יולי', 'אוג\'', 'ספט\'', 'אוק\'', 'נוב\'', 'דצמ\''];
 
-            <div class="bg-slate-100 px-4 py-3 border-t border-slate-200 flex justify-end gap-2 shrink-0">
-                <button onclick="closeBlockedTimesModal()" class="py-2.5 px-4 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl font-bold text-xs transition">ביטול</button>
-                <button onclick="saveBlockedTimesSettings()" class="py-2.5 px-5 bg-onoLime hover:bg-onoLimeDark text-slate-900 rounded-xl font-black text-xs shadow-xs transition">שמור הגדרות</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MONTH & YEAR SELECTOR MODAL -->
-    <div id="monthYearPickerModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-xs rounded-2xl shadow-2xl p-4 animate-pop border border-slate-100 space-y-4">
-            <div class="flex justify-between items-center border-b pb-2">
-                <h3 class="font-extrabold text-sm text-slate-800">מעבר מהיר לחודש ושנה</h3>
-                <button onclick="closeMonthYearPickerModal()" class="text-slate-400 hover:text-slate-700">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">חודש</label>
-                    <select id="quickMonthSelect" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2 text-xs font-bold text-slate-800">
-                        <option value="0">ינואר</option><option value="1">פברואר</option><option value="2">מרץ</option><option value="3">אפריל</option>
-                        <option value="4">מאי</option><option value="5">יוני</option><option value="6">יולי</option><option value="7">אוגוסט</option>
-                        <option value="8">ספטמבר</option><option value="9">אוקטובר</option><option value="10">נובמבר</option><option value="11">דצמבר</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">שנה</label>
-                    <select id="quickYearSelect" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2 text-xs font-bold text-slate-800">
-                        <option value="2026">2026</option><option value="2027">2027</option><option value="2028">2028</option>
-                    </select>
-                </div>
-            </div>
-            <button onclick="applyMonthYearPicker()" class="w-full py-2.5 bg-onoLime hover:bg-onoLimeDark text-slate-900 font-extrabold text-xs rounded-xl shadow-xs transition">אישור ומעבר</button>
-        </div>
-    </div>
-
-    <!-- COURSE DETAIL MODAL -->
-    <div id="courseDetailModal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-pop border border-slate-100">
-            <div id="courseModalHeader" class="px-5 py-4 bg-slate-900 text-white flex justify-between items-center shrink-0">
-                <div>
-                    <span id="courseModalBadge" class="text-[10px] bg-onoLime text-slate-900 font-black px-2 py-0.5 rounded-md inline-block mb-1">פרטי שיעור</span>
-                    <h2 id="courseModalTitle" class="text-sm font-black text-white">שם הקורס</h2>
-                </div>
-                <button onclick="closeCourseDetailModal()" class="text-slate-400 hover:text-white p-1 rounded-full transition">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-            <div class="p-5 space-y-4 text-xs">
-                <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-2">
-                    <div class="flex justify-between items-center"><span class="text-slate-500 font-bold">שעות:</span><span id="courseModalTime" class="font-black text-slate-800">08:30 - 10:00</span></div>
-                    <div class="flex justify-between items-center"><span class="text-slate-500 font-bold">תאריך:</span><span id="courseModalDate" class="font-bold text-slate-800">17/11/2026</span></div>
-                    <div class="flex justify-between items-center"><span class="text-slate-500 font-bold">מרצה / פרטים:</span><span id="courseModalInstructor" class="font-bold text-slate-800">-</span></div>
-                </div>
-
-                <div>
-                    <div class="flex justify-between items-center mb-1.5">
-                        <label class="block text-xs font-black text-slate-700 flex items-center gap-1.5">
-                            <i class="fa-solid fa-location-dot text-onoLimeDark"></i> מיקום השיעור (ניתן לעריכה):
-                        </label>
-                        <a id="courseModalNaviLink" href="https://navi.ono.ac.il/" target="_blank" rel="noopener noreferrer" class="text-[11px] font-bold text-emerald-700 hover:underline flex items-center gap-1">
-                            <i class="fa-solid fa-compass"></i> ניווט בקמפוס
-                        </a>
-                    </div>
-                    <input type="text" id="courseLocationInput" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-bold text-slate-800 focus:ring-2 focus:ring-onoLime focus:outline-none text-xs">
-                </div>
-
-                <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200">
-                    <span class="font-bold text-slate-700 block mb-1">התראות מוגדרות:</span>
-                    <div id="courseModalRemindersList" class="flex flex-wrap gap-1.5 pt-1"></div>
-                </div>
-
-                <div class="flex gap-2 pt-2">
-                    <button onclick="saveCourseLocationEdit()" class="flex-1 py-3 bg-onoLime hover:bg-onoLimeDark text-slate-900 font-black text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-floppy-disk"></i> שמור שינויים לשיעור זה
-                    </button>
-                    <button onclick="closeCourseDetailModal()" class="py-3 px-4 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-xl transition">סגור</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- TASK DETAIL POPUP MODAL -->
-    <div id="taskDetailModal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-pop border border-slate-100">
-            <div id="taskModalHeader" class="px-5 py-4 bg-slate-900 text-white flex justify-between items-center shrink-0 border-b border-slate-800">
-                <div class="flex items-center gap-2.5">
-                    <span id="taskModalCourseBadge" class="w-3.5 h-3.5 rounded-full bg-emerald-500"></span>
-                    <div>
-                        <span id="taskModalCourseName" class="text-[11px] text-slate-300 font-bold block">שם הקורס</span>
-                        <h2 id="taskModalTitle" class="text-sm font-black text-white">שם המשימה</h2>
-                    </div>
-                </div>
-                <button onclick="closeTaskDetailModal()" class="text-slate-400 hover:text-white p-1 rounded-full transition">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-
-            <div class="p-5 overflow-y-auto space-y-4 text-xs flex-1">
-                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
-                    <div class="flex items-center justify-between"><span class="text-slate-500 font-semibold">שלב / תיאור:</span><span id="taskModalStepName" class="font-extrabold text-slate-900 text-xs">שם השלב</span></div>
-                    
-                    <!-- CLICKABLE TIME SLOT FOR EDITING ENTIRE CHAIN -->
-                    <div class="flex items-center justify-between">
-                        <span class="text-slate-500 font-semibold">חלון זמן:</span>
-                        <button onclick="openChainEditModal()" class="group flex items-center gap-1.5 font-black text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-xl border border-emerald-200 transition shadow-xs" title="לחץ לעריכת שעות ותאריכים לכל שרשרת המשימות">
-                            <i class="fa-regular fa-clock text-emerald-600 group-hover:scale-110 transition-transform"></i>
-                            <span id="taskModalTimeSlot">16:00 - 17:30</span>
-                            <i class="fa-solid fa-pen text-[10px] text-emerald-600 opacity-70"></i>
-                        </button>
-                    </div>
-
-                    <div class="flex items-center justify-between"><span class="text-slate-500 font-semibold">תאריך:</span><span id="taskModalDateStr" class="font-bold text-slate-800">17/11/2026</span></div>
-                </div>
-
-                <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-2.5">
-                    <div class="flex justify-between items-center">
-                        <h4 class="text-xs font-black text-slate-800 flex items-center gap-1.5"><i class="fa-solid fa-bell text-amber-500"></i> התראות ותזכורות</h4>
-                        <button onclick="addReminderToActiveTask()" class="text-[11px] font-bold text-onoLimeDark hover:underline flex items-center gap-1"><i class="fa-solid fa-plus-circle"></i> הוסף התראה</button>
-                    </div>
-                    <div id="taskModalRemindersList" class="flex flex-wrap gap-2 pt-1"></div>
-                </div>
-
-                <div id="taskModalActionGrid" class="grid grid-cols-2 gap-2.5 pt-1">
-                    <button onclick="toggleTaskStepCompleted()" id="taskModalCompleteBtn" class="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold flex items-center justify-center gap-1.5 shadow-xs transition">
-                        <i class="fa-solid fa-check-circle"></i><span>סמן כבוצע</span>
-                    </button>
-                    <button onclick="editTaskPrompt()" class="py-2.5 px-3 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold flex items-center justify-center gap-1.5 shadow-xs transition">
-                        <i class="fa-solid fa-pen"></i><span>ערוך מלל</span>
-                    </button>
-                    <button onclick="openChainEditModal()" class="col-span-2 py-3 px-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-black flex items-center justify-center gap-2 shadow-xs transition">
-                        <i class="fa-solid fa-calendar-days"></i><span>ערוך שרשרת משימות ולוח זמנים</span>
-                    </button>
-                    <button onclick="deleteTaskGroup()" class="col-span-2 py-2.5 px-3 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-xl font-bold flex items-center justify-center gap-1.5 transition">
-                        <i class="fa-solid fa-trash-can"></i><span>מחק מטלה זו לחלוטין</span>
-                    </button>
-                </div>
-
-                <div id="taskModalStepsSection" class="pt-3 border-t border-slate-200">
-                    <h4 class="text-xs font-extrabold text-slate-800 mb-2.5 flex items-center gap-1.5"><i class="fa-solid fa-list-check text-onoLimeDark"></i> חלקים נוספים למשימה:</h4>
-                    <div id="taskModalStepsBubbles" class="flex gap-2 overflow-x-auto pb-2 no-scrollbar"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- TASK CHAIN TIMELINE EDIT MODAL (מסך הצעת שיבוץ בעריכה) -->
-    <div id="taskChainEditModal" class="fixed inset-0 z-50 bg-slate-900/75 backdrop-blur-xs hidden flex items-center justify-center p-3 sm:p-4">
-        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-pop border border-slate-100">
-            <div class="bg-onoLime px-5 py-3.5 flex justify-between items-center text-slate-900 shrink-0">
-                <div class="flex items-center gap-2.5">
-                    <i class="fa-solid fa-clock-rotate-left text-lg"></i>
-                    <div>
-                        <h2 class="text-sm font-black">עריכת שרשרת וזמני משימות</h2>
-                        <span id="chainEditTaskTitle" class="text-[11px] font-bold text-slate-800 block"></span>
-                    </div>
-                </div>
-                <button onclick="closeChainEditModal()" class="text-slate-900 hover:bg-black/10 rounded-full w-7 h-7 flex items-center justify-center transition">
-                    <i class="fa-solid fa-xmark text-base"></i>
-                </button>
-            </div>
-
-            <div class="p-4 sm:p-5 overflow-y-auto space-y-3 text-xs flex-1">
-                <p class="text-[11px] text-slate-600 bg-emerald-50 p-2.5 rounded-xl border border-emerald-200">
-                    <i class="fa-solid fa-circle-info text-emerald-600"></i>
-                    עדכון שעה או תאריך בשלב מסוים בשרשרת יעדכן ויזיז באופן אוטומטי את כל השלבים הבאים אחריו.
-                </p>
-                <div id="chainEditTimelineList" class="space-y-2.5"></div>
-            </div>
-
-            <div class="bg-slate-100 px-4 py-3 border-t border-slate-200 flex justify-end gap-2 shrink-0">
-                <button type="button" onclick="closeChainEditModal()" class="py-2.5 px-4 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl font-bold text-xs transition">ביטול</button>
-                <button type="button" onclick="saveTaskChainEdits()" class="py-2.5 px-5 bg-onoLime hover:bg-onoLimeDark text-slate-900 rounded-xl font-black text-xs shadow-xs transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-floppy-disk"></i> שמור עדכון לכל השרשרת
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ADD TASK & SMART SCHEDULER MODAL -->
-    <div id="addTaskModal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs hidden flex items-center justify-center p-3 sm:p-4">
-        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-pop border border-slate-100">
-            <div class="bg-onoLime px-5 py-3.5 flex justify-between items-center text-slate-900 shrink-0">
-                <div class="flex items-center gap-2.5">
-                    <i class="fa-solid fa-layer-group text-lg"></i>
-                    <h2 class="text-sm font-black">יצירת משימה / קורס במערכת</h2>
-                </div>
-                <button onclick="closeAddTaskModal()" class="text-slate-900 hover:bg-black/10 rounded-full w-7 h-7 flex items-center justify-center transition">
-                    <i class="fa-solid fa-xmark text-base"></i>
-                </button>
-            </div>
-
-            <div class="p-4 sm:p-5 overflow-y-auto space-y-4 text-xs flex-1">
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">סוג המשימה / הוספה</label>
-                    <select id="taskTypeSelect" onchange="handleTaskTypeChange()" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-bold text-slate-800 focus:ring-2 focus:ring-onoLime focus:outline-none">
-                        <option value="hebrew_article">קריאת מאמר בעברית</option>
-                        <option value="english_article">קריאת מאמר באנגלית</option>
-                        <option value="memorization">שינון מושגים</option>
-                        <option value="lesson_summary">סיכום שיעור</option>
-                        <option value="assignment">עבודת הגשה / מטלה</option>
-                        <option value="exam_prep">לימוד למבחן סמסטר</option>
-                        <option value="manual_course">קורס במערכת (הוספה ידנית)</option>
-                        <option value="other">אחר</option>
-                    </select>
-                </div>
-
-                <div id="courseSelectWrapper">
-                    <div class="flex justify-between items-center mb-1">
-                        <label class="block text-xs font-bold text-slate-700">שם הקורס השייך</label>
-                    </div>
-                    <div class="flex gap-2">
-                        <select id="taskCourseSelect" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-bold text-slate-800 focus:ring-2 focus:ring-onoLime focus:outline-none"></select>
-                        <button onclick="addNewCoursePrompt()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-3 rounded-xl text-xs font-bold transition shrink-0 flex items-center gap-1">
-                            <i class="fa-solid fa-plus"></i> חדש
-                        </button>
-                    </div>
-                </div>
-
-                <div id="standardTaskFields" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">שם המשימה/העבודה</label>
-                        <input type="text" id="taskTitleInput" placeholder="למשל: שינון מושגים לבוחן" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-800 font-medium focus:ring-2 focus:ring-onoLime focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">תאריך יעד (סיום)</label>
-                        <input type="date" id="taskDueDateInput" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-800 font-medium focus:ring-2 focus:ring-onoLime focus:outline-none">
-                    </div>
-                </div>
-
-                <!-- SPECIAL MANUAL COURSE FORM FIELDS -->
-                <div id="manualCourseFields" class="hidden space-y-3 bg-amber-50/70 p-3.5 rounded-2xl border border-amber-200">
-                    <div class="font-extrabold text-amber-900 text-xs flex items-center gap-1.5 mb-1"><i class="fa-solid fa-book-bookmark text-amber-600"></i> פרטי קורס להוספה ידנית ליומן:</div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">שם הקורס</label>
-                        <input type="text" id="manualCourseNameInput" placeholder="למשל: מבוא לפסיכולוגיה" class="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-slate-800 font-bold">
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">תאריך</label>
-                            <input type="date" id="manualCourseDateInput" class="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-slate-800 font-medium">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">מיקום / חדר / זום</label>
-                            <input type="text" id="manualCourseLocationInput" placeholder="חדר 219 בניין A / זום" class="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-slate-800 font-medium">
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">שעת התחלה</label>
-                            <input type="time" id="manualCourseStartTime" value="08:30" class="w-full bg-white border border-slate-300 rounded-xl p-2.5 font-bold">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">שעת סיום</label>
-                            <input type="time" id="manualCourseEndTime" value="10:00" class="w-full bg-white border border-slate-300 rounded-xl p-2.5 font-bold">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">הערה במלל חופשי</label>
-                        <input type="text" id="manualCourseNoteInput" placeholder="הערות אישיות לשיעור..." class="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-slate-800 font-medium">
-                    </div>
-                </div>
-
-                <div id="dynamicTaskFields" class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-2.5"></div>
-
-                <div id="customStepsArea" class="hidden">
-                    <button onclick="addCustomSubStep()" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-dashed border-slate-300 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition">
-                        <i class="fa-solid fa-plus-circle text-onoLimeDark"></i> הוסף שלב במלל חופשי
-                    </button>
-                </div>
-
-                <div id="reminderConfigRow" class="bg-slate-50 p-3 rounded-2xl border border-slate-200 flex items-center justify-between">
-                    <span class="font-bold text-slate-700">התראות ברירת מחדל:</span>
-                    <div class="flex items-center gap-1">
-                        <input type="number" id="newTaskReminderVal" value="30" min="1" class="w-14 bg-white border border-slate-300 rounded-lg p-1 text-center font-bold text-xs">
-                        <select id="newTaskReminderUnit" class="bg-white border border-slate-300 rounded-lg p-1 font-bold text-xs">
-                            <option value="minutes">דקות לפני</option>
-                            <option value="hours">שעות לפני</option>
-                            <option value="days">ימים לפני</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div id="scheduleProposalResult" class="hidden mt-4 pt-3 border-t border-slate-200">
-                    <div id="proposalAlertNote" class="hidden text-[11px] font-bold text-amber-900 bg-amber-50 p-2.5 rounded-xl border border-amber-200 mb-2"></div>
-                    <h3 class="text-xs font-extrabold text-slate-800 mb-1 flex items-center gap-1.5">
-                        <i class="fa-solid fa-wand-magic-sparkles text-amber-500 text-sm"></i> הצעת שיבוץ וחלוקה ליומן:
-                    </h3>
-                    <div id="proposalTimeline" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
-                </div>
-            </div>
-
-            <div class="bg-slate-100 px-4 py-3 border-t border-slate-200 flex flex-col gap-2 shrink-0">
-                <button id="proposalBtn" type="button" onclick="generateSmartScheduleProposal()" class="w-full py-3 bg-onoLime hover:bg-onoLimeDark text-slate-900 rounded-xl font-black shadow-xs transition flex items-center justify-center gap-2 text-xs">
-                    <i class="fa-solid fa-microchip"></i> הצעת שיבוץ וחלוקה
-                </button>
-                <div class="flex gap-2">
-                    <button type="button" onclick="saveTaskAndSchedule()" class="flex-1 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs shadow-xs transition">שמור והוסף ללוח שנה</button>
-                    <button type="button" onclick="closeAddTaskModal()" class="py-2.5 px-4 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl font-bold text-xs transition">ביטול</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- EXCEL IMPORT MODAL -->
-    <div id="excelImportModal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs hidden flex items-center justify-center p-3 sm:p-4">
-        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-pop border border-slate-100">
-            <div class="bg-slate-900 text-white px-5 py-3.5 flex justify-between items-center shrink-0">
-                <div class="flex items-center gap-2.5">
-                    <i class="fa-solid fa-file-excel text-onoLime text-lg"></i>
-                    <h2 class="text-sm font-black">ייבוא אירועים ומערכת שעות מאקסל</h2>
-                </div>
-                <button onclick="closeExcelImportModal()" class="text-slate-400 hover:text-white transition">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-
-            <div class="p-4 sm:p-5 overflow-y-auto space-y-4 text-xs flex-1">
-                <div class="border-2 border-dashed border-slate-300 rounded-2xl p-6 text-center bg-slate-50 hover:bg-slate-100 transition cursor-pointer" onclick="document.getElementById('excelFileInput').click()">
-                    <i class="fa-solid fa-cloud-arrow-up text-3xl text-onoLimeDark mb-2"></i>
-                    <p class="font-bold text-slate-800">לחץ לבחירת קובץ אקסל (.xlsx, .xls, .csv)</p>
-                    <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleExcelFileUpload(event)">
-                </div>
-
-                <div id="excelPreviewArea" class="hidden space-y-3 pt-2">
-                    <div class="flex justify-between items-center flex-wrap gap-1">
-                        <h3 class="font-black text-slate-800 text-xs" id="excelSummaryTitle">תוצאות טעינת קובץ:</h3>
-                        <div class="flex items-center gap-1.5 text-[11px] font-bold flex-wrap">
-                            <span id="excelUpdatedCount" class="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md hidden"></span>
-                            <span id="excelDuplicatesCount" class="text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md"></span>
-                        </div>
-                    </div>
-                    <div id="excelPreviewList" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
-                </div>
-            </div>
-
-            <div class="bg-slate-100 px-4 py-3 border-t border-slate-200 flex justify-end gap-2 shrink-0">
-                <button onclick="closeExcelImportModal()" class="py-2.5 px-4 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl font-bold text-xs transition">ביטול</button>
-                <button onclick="confirmExcelImport()" id="confirmImportBtn" class="py-2.5 px-5 bg-onoLime hover:bg-onoLimeDark text-slate-900 rounded-xl font-black text-xs shadow-xs transition hidden">אשר ועדכן ביומן</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- EDIT REMINDER MODAL -->
-    <div id="editReminderModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-xs rounded-2xl shadow-2xl p-4 animate-pop border border-slate-100 space-y-3">
-            <h3 class="font-extrabold text-xs text-slate-800">עריכת התראה</h3>
-            <div class="flex gap-2">
-                <input type="number" id="editRemVal" min="1" value="10" class="w-20 bg-slate-50 border border-slate-300 rounded-xl p-2 text-center font-bold text-xs">
-                <select id="editRemUnit" class="flex-1 bg-slate-50 border border-slate-300 rounded-xl p-2 font-bold text-xs">
-                    <option value="minutes">דקות לפני</option>
-                    <option value="hours">שעות לפני</option>
-                    <option value="days">ימים לפני</option>
-                </select>
-            </div>
-            <div class="flex gap-2 pt-1">
-                <button onclick="saveReminderEdit()" class="flex-1 py-2 bg-onoLime hover:bg-onoLimeDark text-slate-900 font-bold text-xs rounded-xl transition">שמור</button>
-                <button onclick="deleteCurrentReminder()" class="py-2 px-3 bg-red-100 hover:bg-red-200 text-red-700 font-bold text-xs rounded-xl transition">מחק</button>
-                <button onclick="closeEditReminderModal()" class="py-2 px-3 bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition">ביטול</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- TOAST BANNER -->
-    <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-xs px-4 py-2.5 rounded-full shadow-2xl opacity-0 pointer-events-none transition-opacity duration-300 flex items-center gap-2 border border-slate-700">
-        <i id="toastIcon" class="fa-solid fa-circle-check text-onoLime"></i>
-        <span id="toastMessage">פעולה בוצעה בהצלחה</span>
-    </div>
-
-    <!-- FIREBASE & MAIN SCRIPT -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        // FIREBASE CONFIGURATION
-        const firebaseConfig = {
-            apiKey: "AIzaSyBfmBVq0xbChK7f9hNT91RGGiuSGz6-oAw",
-            authDomain: "roni-student-planner.firebaseapp.com",
-            projectId: "roni-student-planner",
-            storageBucket: "roni-student-planner.firebasestorage.app",
-            messagingSenderId: "445035976281",
-            appId: "1:445035976281:web:a60fef6d4db5fe81e7c348",
-            measurementId: "G-ZM5HGZ2D16"
+        const EVENT_TYPES = {
+            'מבחן': { label: 'מבחן', bg: 'bg-red-50 text-red-700 border-red-200', badge: 'bg-red-600 text-white', dot: 'bg-red-500', hex: '#ef4444', icon: '📝' },
+            'מטלה': { label: 'מטלה', bg: 'bg-amber-50 text-amber-800 border-amber-200', badge: 'bg-amber-500 text-white', dot: 'bg-amber-500', hex: '#f59e0b', icon: '📌' },
+            'הרצאה': { label: 'הרצאה', bg: 'bg-blue-50 text-blue-800 border-blue-200', badge: 'bg-blue-600 text-white', dot: 'bg-blue-500', hex: '#3b82f6', icon: '🎓' },
+            'תרגול': { label: 'תרגול', bg: 'bg-purple-50 text-purple-800 border-purple-200', badge: 'bg-purple-600 text-white', dot: 'bg-purple-500', hex: '#8b5cf6', icon: '💻' },
+            'אירוע': { label: 'אירוע אישי', bg: 'bg-emerald-50 text-emerald-800 border-emerald-200', badge: 'bg-emerald-600 text-white', dot: 'bg-emerald-500', hex: '#10b981', icon: '⭐' }
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const userDocRef = doc(db, "users_data", "main_planner_store");
-
-        // --- COURSE COLOR PALETTE ---
-        const COURSE_COLORS = {
-            "ביולוגיה של התא": "#1d4ed8",
-            "ניתוח מאמר מדעי וחיפוש במאגרי מידע": "#059669",
-            "אודיולוגיה בסיסית (א)": "#d97706",
-            "סטטיסטיקה למקצועות הבריאות": "#7c3aed",
-            "מבוא למדעים מדויקים ב'+ ג' - פיסיקה": "#dc2626",
-            "מבוא לבלשנות": "#0891b2",
-            "כניסה לאקדמיה - אסטרטגיות מתנ\"א": "#4f46e5",
-            "התפתחות נורמאלית של שפה ודיבור (א)": "#ec4899",
-            "מבוא לאנטומיה של האדם א'": "#10b981",
-            "התנסות קלינית דיבור": "#f59e0b",
-            "פרקטיקום באודיולוגיה בסיסית (ב)": "#8b5cf6",
-            "סדנת אקדמיה שיוויונית": "#0284c7",
-            "מפגש סגל אקדמי": "#64748b",
-            "מועדים מיוחדים / חגים": "#e11d48",
-            "מועדים אקדמיים": "#6366f1",
-            "כללי": "#64748b"
-        };
-
-        // --- GLOBAL APP STATE ---
-        window.state = {
-            currentDate: new Date(),
-            selectedDate: new Date(),
-            viewMode: 'month',
-            sheetExpanded: false,
-            themeColor: '#a8d100',
-            courses: [
-                { id: 'c1', name: 'ביולוגיה של התא', color: COURSE_COLORS['ביולוגיה של התא'] },
-                { id: 'c2', name: 'ניתוח מאמר מדעי וחיפוש במאגרי מידע', color: COURSE_COLORS['ניתוח מאמר מדעי וחיפוש במאגרי מידע'] },
-                { id: 'c3', name: 'אודיולוגיה בסיסית (א)', color: COURSE_COLORS['אודיולוגיה בסיסית (א)'] },
-                { id: 'c4', name: 'סטטיסטיקה למקצועות הבריאות', color: COURSE_COLORS['סטטיסטיקה למקצועות הבריאות'] },
-                { id: 'c5', name: 'מבוא למדעים מדויקים ב\'+ ג\' - פיסיקה', color: COURSE_COLORS['מבוא למדעים מדויקים ב\'+ ג\' - פיסיקה'] },
-                { id: 'c6', name: 'מבוא לבלשנות', color: COURSE_COLORS['מבוא לבלשנות'] },
-                { id: 'c7', name: 'התפתחות נורמאלית של שפה ודיבור (א)', color: COURSE_COLORS['התפתחות נורמאלית של שפה ודיבור (א)'] },
-                { id: 'c8', name: 'מבוא לאנטומיה של האדם א\'', color: COURSE_COLORS['מבוא לאנטומיה של האדם א\''] },
-                { id: 'c9', name: 'התנסות קלינית דיבור', color: COURSE_COLORS['התנסות קלינית דיבור'] },
-                { id: 'general', name: 'כללי', color: COURSE_COLORS['כללי'] }
-            ],
-            events: [],
-            taskGroups: [],
-            blockedTimes: {
-                0: [{ start: "18:00", end: "21:00" }],
-                1: [{ start: "18:00", end: "21:00" }],
-                2: [{ start: "18:00", end: "21:00" }],
-                3: [{ start: "18:00", end: "21:00" }],
-                4: [{ start: "18:00", end: "21:00" }],
-                5: [],
-                6: []
+        // Realistic Sample Data for November 2026
+        const SAMPLE_EVENTS = [
+            {
+                id: '1',
+                title: 'הרצאה: חדוו"א 2א',
+                course: 'חדוו"א 2א',
+                type: 'הרצאה',
+                date: '2026-11-17',
+                startTime: '09:00',
+                endTime: '11:00',
+                location: 'בניין 101, אולם B',
+                priority: 'בינונית',
+                completed: false,
+                notes: 'חזרה על טור פורייה, אינטגרלים כפולים ומשוואות דיפרנציאליות',
+                color: '#3b82f6'
             },
-            activeModalTask: null,
-            activeModalStepIdx: 0,
-            activeCourseEvent: null,
-            activeReminderEditIdx: -1,
-            generatedProposal: null,
-            excelImportPreview: [],
-            excelUpdatedEvents: [],
-            editingTaskChainGroup: null,
-            editingTaskChainSteps: []
-        };
+            {
+                id: '2',
+                title: 'תרגול: אלגברה לינארית 2',
+                course: 'אלגברה לינארית',
+                type: 'תרגול',
+                date: '2026-11-17',
+                startTime: '11:30',
+                endTime: '13:00',
+                location: 'מעבדה 4, בניין מדעים',
+                priority: 'בינונית',
+                completed: false,
+                notes: 'להביא דפי נוסחאות וסיכומים של ערכים עצמיים',
+                color: '#8b5cf6'
+            },
+            {
+                id: '3',
+                title: 'הגשת תרגיל בית 3 בפיזיקה',
+                course: 'פיזיקה קלאסית',
+                type: 'מטלה',
+                date: '2026-11-17',
+                startTime: '16:00',
+                endTime: '17:00',
+                location: 'מערכת Moodle',
+                priority: 'גבוהה',
+                completed: false,
+                notes: 'תרגילים 1-5 בפרק 4 (חוקי ניוטון ועבודה)',
+                color: '#f59e0b'
+            },
+            {
+                id: '4',
+                title: 'מפגש קבוצת לימוד לחדוו"א',
+                course: 'חדוו"א 2א',
+                type: 'אירוע',
+                date: '2026-11-17',
+                startTime: '18:00',
+                endTime: '20:00',
+                location: 'ספרייה מרכזית - חדר שקט 3',
+                priority: 'נמוכה',
+                completed: false,
+                notes: 'פתרון מבחנים משנים קודמות לקראת הבוחן',
+                color: '#10b981'
+            },
+            {
+                id: '5',
+                title: 'מבחן אמצע: מבוא למדעי המחשב',
+                course: 'מבוא למדעי המחשב',
+                type: 'מבחן',
+                date: '2026-11-19',
+                startTime: '10:00',
+                endTime: '12:30',
+                location: 'אולם ספורט מרכזי',
+                priority: 'גבוהה',
+                completed: false,
+                notes: 'מבחן חצי סמסטר - פייתון, סיבוכיות, רקורסיה ועצי החלטה',
+                color: '#ef4444'
+            },
+            {
+                id: '6',
+                title: 'הרצאה: מערכות ספרתיות',
+                course: 'מערכות ספרתיות',
+                type: 'הרצאה',
+                date: '2026-11-18',
+                startTime: '08:30',
+                endTime: '10:30',
+                location: 'אולם 204',
+                priority: 'נמוכה',
+                completed: true,
+                notes: 'אלגברה בוליאנית, מפות קרנו ומפענחים',
+                color: '#3b82f6'
+            },
+            {
+                id: '7',
+                title: 'תרגול מעבדה: מבני נתונים',
+                course: 'מבני נתונים',
+                type: 'תרגול',
+                date: '2026-11-22',
+                startTime: '11:00',
+                endTime: '13:00',
+                location: 'בניין 302, מעבדה ב\'',
+                priority: 'בינונית',
+                completed: false,
+                notes: 'עצים מאוזנים AVL וטבלאות גיבוב Hash',
+                color: '#8b5cf6'
+            }
+        ];
 
-        // --- SANITIZE & PROTECT STATE DATA ---
-        function sanitizeStateData() {
-            if (!Array.isArray(state.events)) state.events = [];
-            if (!Array.isArray(state.taskGroups)) state.taskGroups = [];
-            if (!Array.isArray(state.courses)) state.courses = [];
-
-            state.taskGroups.forEach(group => {
-                if (!group.steps || !Array.isArray(group.steps)) {
-                    group.steps = [];
-                }
-            });
+        // Date Helpers
+        function parseDateString(dateStr) {
+            const [y, m, d] = dateStr.split('-').map(Number);
+            return new Date(y, m - 1, d);
         }
 
-        // --- THEME COLOR MANAGEMENT ---
-        window.applyCustomThemeColor = function(colorHex) {
-            if (!colorHex) return;
-            state.themeColor = colorHex;
-            
-            const darkHex = adjustColorBrightness(colorHex, -20);
-            const lightHex = adjustColorBrightness(colorHex, 35);
-
-            document.documentElement.style.setProperty('--brand-primary', colorHex);
-            document.documentElement.style.setProperty('--brand-dark', darkHex);
-            document.documentElement.style.setProperty('--brand-light', lightHex);
-
-            const picker = document.getElementById('themeColorPicker');
-            if (picker) picker.value = colorHex;
-
-            const metaTag = document.getElementById('themeColorMeta');
-            if (metaTag) metaTag.setAttribute('content', colorHex);
-
-            saveData();
-        };
-
-        window.resetThemeColor = function() {
-            applyCustomThemeColor('#a8d100');
-            showToast('צבע הנושא אופס לברירת המחדל');
-        };
-
-        function adjustColorBrightness(hex, percent) {
-            let num = parseInt(hex.replace('#', ''), 16);
-            if (isNaN(num)) return hex;
-            let amt = Math.round(2.55 * percent);
-            let R = (num >> 16) + amt;
-            let G = (num >> 8 & 0x00FF) + amt;
-            let B = (num & 0x0000FF) + amt;
-
-            return '#' + (0x1000000 + 
-                (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 + 
-                (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 + 
-                (B < 255 ? (B < 1 ? 0 : B) : 255)
-            ).toString(16).slice(1);
+        function formatDateISO(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
         }
 
-        // --- FIREBASE REALTIME SYNC & LOCAL PERSISTENCE ---
-        function initFirebaseRealtimeSync() {
-            try {
-                const savedGroups = localStorage.getItem('student_planner_groups_v7');
-                if (savedGroups) state.taskGroups = JSON.parse(savedGroups);
+        function getWeekDatesForDate(currentDate) {
+            const d = new Date(currentDate);
+            const dayOfWeek = d.getDay(); // 0 is Sunday in JS
+            const sunday = new Date(d);
+            sunday.setDate(d.getDate() - dayOfWeek);
 
-                const savedCourses = localStorage.getItem('student_planner_courses_v7');
-                if (savedCourses) state.courses = JSON.parse(savedCourses);
-
-                const savedEvents = localStorage.getItem('student_planner_events_v7');
-                if (savedEvents) state.events = JSON.parse(savedEvents);
-
-                const savedBlocked = localStorage.getItem('student_planner_blocked_v7');
-                if (savedBlocked) state.blockedTimes = JSON.parse(savedBlocked);
-
-                const savedTheme = localStorage.getItem('student_planner_theme_v7');
-                if (savedTheme) applyCustomThemeColor(savedTheme);
-
-                sanitizeStateData();
-            } catch (e) {
-                console.error("Local storage error:", e);
-            }
-
-            onSnapshot(userDocRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    if (data.taskGroups && Array.isArray(data.taskGroups)) state.taskGroups = data.taskGroups;
-                    if (data.courses && Array.isArray(data.courses)) state.courses = data.courses;
-                    if (data.events && Array.isArray(data.events)) state.events = data.events;
-                    if (data.blockedTimes) state.blockedTimes = data.blockedTimes;
-                    if (data.themeColor) applyCustomThemeColor(data.themeColor);
-                    
-                    sanitizeStateData();
-                    
-                    localStorage.setItem('student_planner_groups_v7', JSON.stringify(state.taskGroups));
-                    localStorage.setItem('student_planner_courses_v7', JSON.stringify(state.courses));
-                    localStorage.setItem('student_planner_events_v7', JSON.stringify(state.events));
-                    localStorage.setItem('student_planner_blocked_v7', JSON.stringify(state.blockedTimes));
-                    if (state.themeColor) localStorage.setItem('student_planner_theme_v7', state.themeColor);
-                    
-                    renderApp();
-                }
-            }, (error) => {
-                console.warn("Firestore offline mode or rule restriction:", error);
-            });
-        }
-
-        window.saveData = async function() {
-            sanitizeStateData();
-            try {
-                localStorage.setItem('student_planner_groups_v7', JSON.stringify(state.taskGroups));
-                localStorage.setItem('student_planner_courses_v7', JSON.stringify(state.courses));
-                localStorage.setItem('student_planner_events_v7', JSON.stringify(state.events));
-                localStorage.setItem('student_planner_blocked_v7', JSON.stringify(state.blockedTimes));
-                if (state.themeColor) localStorage.setItem('student_planner_theme_v7', state.themeColor);
-            } catch (e) {
-                console.error("Local storage write error:", e);
-            }
-
-            try {
-                await setDoc(userDocRef, {
-                    taskGroups: state.taskGroups,
-                    courses: state.courses,
-                    events: state.events,
-                    blockedTimes: state.blockedTimes,
-                    themeColor: state.themeColor,
-                    updatedAt: new Date().toISOString()
-                }, { merge: true });
-            } catch (err) {
-                console.error("Error saving to Firebase:", err);
-            }
-        };
-
-        // --- LOCATION PARSER & LINK RENDERER ---
-        function parseLocationFromExcelRow(row) {
-            const rawExplicit = (row['מיקום'] || row['חדר'] || row['Location'] || '').toString().trim();
-            const contentText = (row['תוכן'] || row['Content'] || row['תיאור'] || row['Description'] || row['מידע נוסף'] || '').toString().trim();
-            const fullCombined = `${rawExplicit} ${contentText} ${Object.values(row).join(' ')}`.trim();
-
-            if (/זום|zoom/i.test(fullCombined)) {
-                return 'שיעור בזום';
-            }
-
-            const hlMatch = fullCombined.match(/חדר\s*לימוד\s*:\s*(.*?)(?=\s*קמפוס|\s*\(מתקיים\)|\s*קורס|\s*השיעור|\s*רשום|$)/i);
-            if (hlMatch && hlMatch[1]) {
-                let parsedVal = hlMatch[1].replace(/-\s*חדש/g, '').replace(/\.$/, '').trim();
-                if (parsedVal) return parsedVal;
-            }
-
-            const roomMatch = fullCombined.match(/(חדר(?:\s+הרצאות)?(?:\s*[-–]\s*|\s+)\d+[^\s,]*|תא\s*שמע\s*[-–]?\s*\d+|מעבדה\s*\d+|אודיטוריום\s*\d+|כיתת\s*אנטומיה)/i);
-            const bldMatch = fullCombined.match(/(בניין\s*[A-Za-z0-9א-ת]+)/i);
-
-            const parts = [];
-            if (roomMatch) parts.push(roomMatch[1].trim());
-            if (bldMatch) parts.push(bldMatch[1].trim());
-
-            if (parts.length > 0) return parts.join(' ');
-            if (rawExplicit && rawExplicit !== 'קמפוס') return rawExplicit;
-
-            return 'קמפוס';
-        }
-
-        function cleanCourseName(rawTitle) {
-            if (!rawTitle) return 'כללי';
-            let title = String(rawTitle).trim();
-            
-            title = title.replace(/\*\*\s*השיעור מבוטל\s*\*\*/g, '').replace(/השיעור בוטל\./g, '').trim();
-            title = title.replace(/(ד"ר|גב'|מר|פרופ'|פרופסור)\s+[\u0590-\u05FF\s]+/g, '').trim();
-
-            for (let courseObj of state.courses) {
-                if (courseObj.name !== 'כללי' && title.includes(courseObj.name)) {
-                    return courseObj.name;
-                }
-            }
-            return title || 'כללי';
-        }
-
-        function renderLocationHtml(location) {
-            if (!location) return '<span class="text-slate-500">קמפוס</span>';
-            const locStr = String(location).trim();
-
-            if (/זום|zoom/i.test(locStr) || locStr === 'שיעור בזום') {
-                return `
-                    <span class="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded-md border border-blue-200 text-[11px]">
-                        <i class="fa-solid fa-video text-blue-500 text-xs"></i>
-                        <span>שיעור בזום</span>
-                    </span>
-                `;
-            }
-
-            return `
-                <a href="https://navi.ono.ac.il/" target="_blank" rel="noopener noreferrer" 
-                   onclick="event.stopPropagation();" 
-                   class="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-900 font-bold hover:underline transition group"
-                   title="לחץ לפתיחת מפת ניווט בקמפוס (navi.ono.ac.il)">
-                    <i class="fa-solid fa-diamond-turn-right text-emerald-600 group-hover:scale-110 transition-transform"></i>
-                    <span>${locStr}</span>
-                    <i class="fa-solid fa-arrow-up-right-from-square text-[9px] opacity-70"></i>
-                </a>
-            `;
-        }
-
-        // --- PWA SETUP ---
-        (function setupPWA() {
-            const manifestData = {
-                name: "רוני סטודנט פלאנר",
-                short_name: "פלאנר",
-                description: "אפליקציית ניהול עומסי לימודים, מערכת שעות ומשימות לסטודנטים",
-                start_url: "./",
-                display: "standalone",
-                background_color: "#ffffff",
-                theme_color: "#a8d100",
-                icons: [{
-                    src: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><path fill='%23a8d100' d='M0 0h512v512H0z'/><path fill='%230f172a' d='M256 120L32 216l224 96 176-75.4V360h32V216L256 120z'/></svg>",
-                    sizes: "512x512",
-                    type: "image/svg+xml"
-                }]
-            };
-            const blob = new Blob([JSON.stringify(manifestData)], { type: 'application/json' });
-            document.querySelector('#manifestLink').setAttribute('href', URL.createObjectURL(blob));
-
-            if ('serviceWorker' in navigator) {
-                const swCode = `
-                    self.addEventListener('install', (e) => self.skipWaiting());
-                    self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
-                    self.addEventListener('fetch', (e) => {});
-                `;
-                navigator.serviceWorker.register(URL.createObjectURL(new Blob([swCode], { type: 'text/javascript' }))).catch(() => {});
-            }
-        })();
-
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            const installBtn = document.getElementById('pwaInstallBtn');
-            if (installBtn) installBtn.classList.remove('hidden');
-        });
-
-        window.installPWA = function() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((result) => {
-                    if (result.outcome === 'accepted') showToast('האפליקציה הותקנה בהצלחה!');
-                    deferredPrompt = null;
-                    document.getElementById('pwaInstallBtn').classList.add('hidden');
-                });
-            }
-        };
-
-        // --- APP INITIALIZATION ---
-        window.onload = function() {
-            initFirebaseRealtimeSync();
-
-            if ("Notification" in window) {
-                updateNotifBtnUI(Notification.permission);
-            }
-
-            const todayStr = formatDateISO(new Date());
-            const dueDateInput = document.getElementById('taskDueDateInput');
-            if (dueDateInput) dueDateInput.min = todayStr;
-            const defaultDueDate = new Date(state.selectedDate);
-            defaultDueDate.setDate(defaultDueDate.getDate() + 7);
-            if (dueDateInput) dueDateInput.value = formatDateISO(defaultDueDate);
-            const manualDateInput = document.getElementById('manualCourseDateInput');
-            if (manualDateInput) manualDateInput.value = formatDateISO(state.selectedDate);
-
-            populateFilteredCourseSelect();
-            handleTaskTypeChange();
-            renderApp();
-        };
-
-        window.renderApp = function() {
-            try {
-                renderHeaderTitle();
-                renderCalendar();
-                renderSelectedDaySchedule();
-            } catch (err) {
-                console.error("Error rendering app:", err);
-            }
-        };
-
-        // --- CALENDAR NAVIGATION ---
-        window.navigateDate = function(direction) {
-            if (state.viewMode === 'month') {
-                state.currentDate.setMonth(state.currentDate.getMonth() + direction);
-            } else {
-                state.currentDate.setDate(state.currentDate.getDate() + (direction * 7));
-            }
-            renderApp();
-        };
-
-        window.toggleCalendarView = function() {
-            state.viewMode = state.viewMode === 'month' ? 'week' : 'month';
-            const icon = document.getElementById('viewToggleIcon');
-            const label = document.getElementById('viewToggleLabel');
-            
-            if (state.viewMode === 'month') {
-                if (icon) icon.className = 'fa-solid fa-calendar-week text-sm';
-                if (label) label.textContent = 'שבועי';
-                showToast('תצוגת חודש');
-            } else {
-                if (icon) icon.className = 'fa-solid fa-calendar-days text-sm';
-                if (label) label.textContent = 'חודשי';
-                showToast('תצוגת שבוע');
-            }
-            renderApp();
-        };
-
-        window.goToToday = function() {
-            state.currentDate = new Date();
-            state.selectedDate = new Date();
-            renderApp();
-            showToast('חזרת להיום');
-        };
-
-        window.openMonthYearPickerModal = function() {
-            document.getElementById('quickMonthSelect').value = state.currentDate.getMonth();
-            document.getElementById('quickYearSelect').value = state.currentDate.getFullYear();
-            document.getElementById('monthYearPickerModal').classList.remove('hidden');
-        };
-
-        window.closeMonthYearPickerModal = function() {
-            document.getElementById('monthYearPickerModal').classList.add('hidden');
-        };
-
-        window.applyMonthYearPicker = function() {
-            const month = parseInt(document.getElementById('quickMonthSelect').value);
-            const year = parseInt(document.getElementById('quickYearSelect').value);
-            state.currentDate = new Date(year, month, 1);
-            closeMonthYearPickerModal();
-            renderApp();
-            showToast('תצוגת הלוח עודכנה');
-        };
-
-        function renderHeaderTitle() {
-            const monthsShortHe = ['ינו\'', 'פבר\'', 'מרץ', 'אפר\'', 'מאי', 'יוני', 'יולי', 'אוג\'', 'ספט\'', 'אוק\'', 'נוב\'', 'דצמ\''];
-            const titleEl = document.getElementById('calendarTitle');
-            if (!titleEl) return;
-
-            const monthName = monthsShortHe[state.currentDate.getMonth()];
-            const year = state.currentDate.getFullYear();
-
-            if (state.viewMode === 'month') {
-                titleEl.textContent = `${monthName} ${year}`;
-            } else {
-                const startOfWeek = getStartOfWeek(state.currentDate);
-                const endOfWeek = new Date(startOfWeek);
-                endOfWeek.setDate(endOfWeek.getDate() + 6);
-                titleEl.textContent = `${startOfWeek.getDate()} - ${endOfWeek.getDate()} ${monthsShortHe[endOfWeek.getMonth()]} ${year}`;
-            }
-        }
-
-        // --- CALENDAR GRID RENDERERS ---
-        function renderCalendar() {
-            const gridContainer = document.getElementById('calendarGrid');
-            if (!gridContainer) return;
-            gridContainer.innerHTML = '';
-            try {
-                if (state.viewMode === 'month') {
-                    renderMonthGrid(gridContainer);
-                } else {
-                    renderWeekGrid(gridContainer);
-                }
-            } catch (err) {
-                console.error("Error rendering calendar grid:", err);
-            }
-        }
-
-        function renderMonthGrid(container) {
-            const year = state.currentDate.getFullYear();
-            const month = state.currentDate.getMonth();
-
-            const firstDayOfMonth = new Date(year, month, 1);
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const startDayIndex = firstDayOfMonth.getDay();
-            const prevMonthDays = new Date(year, month, 0).getDate();
-
-            const grid = document.createElement('div');
-            grid.className = 'grid grid-cols-7 gap-1 text-center text-xs';
-
-            for (let i = startDayIndex - 1; i >= 0; i--) {
-                const dayNum = prevMonthDays - i;
-                const dateObj = new Date(year, month - 1, dayNum);
-                grid.appendChild(createDayCell(dayNum, true, false, dateObj));
-            }
-
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dateObj = new Date(year, month, day);
-                const isSelected = isSameDate(dateObj, state.selectedDate);
-                grid.appendChild(createDayCell(day, false, isSelected, dateObj));
-            }
-
-            const totalCells = startDayIndex + daysInMonth;
-            const remaining = (7 - (totalCells % 7)) % 7;
-            for (let day = 1; day <= remaining; day++) {
-                const dateObj = new Date(year, month + 1, day);
-                grid.appendChild(createDayCell(day, true, false, dateObj));
-            }
-
-            container.appendChild(grid);
-        }
-
-        function renderWeekGrid(container) {
-            const startOfWeek = getStartOfWeek(state.currentDate);
-            const grid = document.createElement('div');
-            grid.className = 'grid grid-cols-7 gap-1 text-center text-xs py-1';
-
+            const week = [];
             for (let i = 0; i < 7; i++) {
-                const dateObj = new Date(startOfWeek);
-                dateObj.setDate(dateObj.getDate() + i);
-                const isSelected = isSameDate(dateObj, state.selectedDate);
-                grid.appendChild(createDayCell(dateObj.getDate(), false, isSelected, dateObj));
+                const nextDay = new Date(sunday);
+                nextDay.setDate(sunday.getDate() + i);
+                week.push(nextDay);
             }
-
-            container.appendChild(grid);
+            return week;
         }
 
-        function createDayCell(dayNumber, isOtherMonth, isSelected, dateObj) {
-            const cell = document.createElement('div');
-            cell.className = `day-cell flex flex-col items-center justify-start py-1 rounded-xl cursor-pointer transition hover:bg-slate-100 ${isOtherMonth ? 'opacity-30' : ''}`;
-            
-            cell.onclick = () => {
-                state.selectedDate = new Date(dateObj);
-                populateFilteredCourseSelect();
-                renderApp();
-            };
-
-            const numSpan = document.createElement('span');
-            numSpan.className = `w-6 h-6 flex items-center justify-center rounded-full font-bold text-xs transition ${
-                isSelected 
-                    ? 'bg-onoLime text-slate-900 shadow-xs scale-105 ring-2 ring-onoLimeDark' 
-                    : isToday(dateObj) 
-                        ? 'border-2 border-onoLime text-slate-900' 
-                        : 'text-slate-800'
-            }`;
-            numSpan.textContent = dayNumber;
-            cell.appendChild(numSpan);
-
-            const dotsContainer = document.createElement('div');
-            dotsContainer.className = 'flex items-center justify-center gap-1 mt-1 min-h-[6px] flex-wrap max-w-[32px]';
-
-            const dayEvents = getEventsForDate(dateObj);
-            const dayTaskSteps = getTaskStepsForDate(dateObj);
-
-            if (dayEvents.length > 0) {
-                const dot = document.createElement('span');
-                const hasExam = dayEvents.some(e => e.type === 'exam');
-                const hasHoliday = dayEvents.some(e => e.type === 'holiday');
-                const hasCanceled = dayEvents.some(e => e.isCanceled);
-                dot.className = `w-1.5 h-1.5 rounded-full ${hasCanceled ? 'bg-red-400' : hasExam ? 'bg-amber-500 ring-1 ring-amber-300' : hasHoliday ? 'bg-purple-600' : 'bg-red-600'}`;
-                dotsContainer.appendChild(dot);
+        function formatHebrewFullDate(dateStr) {
+            try {
+                const d = parseDateString(dateStr);
+                const dayName = HEBREW_DAYS_FULL[d.getDay()];
+                const dayNum = d.getDate();
+                const monthName = HEBREW_MONTHS[d.getMonth()];
+                const year = d.getFullYear();
+                return `${dayName} ${dayNum} ${monthName} ${year}`;
+            } catch (e) {
+                return dateStr;
             }
+        }
 
-            dayTaskSteps.forEach(stepItem => {
-                const dot = document.createElement('span');
-                dot.className = 'w-1.5 h-1.5 rounded-full';
-                const courseColor = COURSE_COLORS[stepItem.group.courseName] || '#059669';
-                dot.style.backgroundColor = courseColor;
-                dotsContainer.appendChild(dot);
+        function MainApp() {
+            // Selected date string in YYYY-MM-DD (Defaults to 2026-11-17 matching the screenshot!)
+            const [selectedDate, setSelectedDate] = useState('2026-11-17');
+            const [viewMode, setViewMode] = useState('daily'); // 'daily' | 'weekly' | 'agenda'
+            const [isDayAccordionOpen, setIsDayAccordionOpen] = useState(true);
+            const [activeModal, setActiveModal] = useState(null); // 'add' | 'edit' | 'notifications' | 'import' | 'settings' | 'detail'
+            const [editingEvent, setEditingEvent] = useState(null);
+            const [prefilledTime, setPrefilledTime] = useState('09:00');
+            const [searchQuery, setSearchQuery] = useState('');
+            const [filterCategory, setFilterCategory] = useState('all');
+
+            // Persistent Events State
+            const [events, setEvents] = useState(() => {
+                try {
+                    const local = localStorage.getItem('roni_planner_events_v3');
+                    if (local) return JSON.parse(local);
+                } catch (err) {
+                    console.error("Failed loading local storage events:", err);
+                }
+                return SAMPLE_EVENTS;
             });
 
-            cell.appendChild(dotsContainer);
-            return cell;
+            // Planner Settings
+            const [userSettings, setUserSettings] = useState(() => {
+                try {
+                    const saved = localStorage.getItem('roni_planner_settings');
+                    if (saved) return JSON.parse(saved);
+                } catch (e) {}
+                return {
+                    studentName: 'רוני',
+                    institution: 'אוניברסיטה / מכללה',
+                    showWeekends: true
+                };
+            });
+
+            // Save to localStorage
+            useEffect(() => {
+                try {
+                    localStorage.setItem('roni_planner_events_v3', JSON.stringify(events));
+                } catch (e) {
+                    console.error("Failed to save events:", e);
+                }
+            }, [events]);
+
+            useEffect(() => {
+                try {
+                    localStorage.setItem('roni_planner_settings', JSON.stringify(userSettings));
+                } catch (e) {}
+            }, [userSettings]);
+
+            // Date navigation helpers
+            const activeDateObj = useMemo(() => parseDateString(selectedDate), [selectedDate]);
+            const currentWeekDays = useMemo(() => getWeekDatesForDate(activeDateObj), [activeDateObj]);
+
+            const currentMonthYearLabel = useMemo(() => {
+                const monthName = HEBREW_MONTHS_SHORT[activeDateObj.getMonth()];
+                const year = activeDateObj.getFullYear();
+                return `${monthName}' ${year}`;
+            }, [activeDateObj]);
+
+            // Filter events for selected date
+            const selectedDayEvents = useMemo(() => {
+                if (!Array.isArray(events)) return [];
+                return events.filter(e => e.date === selectedDate).sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
+            }, [events, selectedDate]);
+
+            // Notification counts (upcoming exams & incomplete tasks)
+            const notificationList = useMemo(() => {
+                if (!Array.isArray(events)) return [];
+                return events.filter(e => {
+                    if (e.type === 'מבחן' && !e.completed) return true;
+                    if (e.type === 'מטלה' && !e.completed) return true;
+                    return false;
+                });
+            }, [events]);
+
+            // Handlers
+            const handlePrevWeek = () => {
+                const prev = new Date(activeDateObj);
+                prev.setDate(prev.getDate() - 7);
+                setSelectedDate(formatDateISO(prev));
+            };
+
+            const handleNextWeek = () => {
+                const next = new Date(activeDateObj);
+                next.setDate(next.getDate() + 7);
+                setSelectedDate(formatDateISO(next));
+            };
+
+            const handleResetToday = () => {
+                // Returns to 17 Nov 2026 or real current date
+                setSelectedDate('2026-11-17');
+            };
+
+            const handleToggleComplete = (eventId, e) => {
+                if (e) e.stopPropagation();
+                setEvents(prev => prev.map(ev => ev.id === eventId ? { ...ev, completed: !ev.completed } : ev));
+            };
+
+            const handleDeleteEvent = (eventId, e) => {
+                if (e) e.stopPropagation();
+                setEvents(prev => prev.filter(ev => ev.id !== eventId));
+                if (activeModal === 'detail') setActiveModal(null);
+            };
+
+            const handleSaveEvent = (eventData) => {
+                if (eventData.id) {
+                    setEvents(prev => prev.map(ev => ev.id === eventData.id ? eventData : ev));
+                } else {
+                    const newEv = {
+                        ...eventData,
+                        id: Date.now().toString()
+                    };
+                    setEvents(prev => [...prev, newEv]);
+                }
+                setActiveModal(null);
+                setEditingEvent(null);
+            };
+
+            const openAddForHour = (hourStr) => {
+                setEditingEvent({
+                    title: '',
+                    course: 'חדוו"א 2א',
+                    type: 'הרצאה',
+                    date: selectedDate,
+                    startTime: hourStr,
+                    endTime: `${String(Number(hourStr.split(':')[0]) + 1).padStart(2, '0')}:00`,
+                    location: 'אולם 101',
+                    priority: 'בינונית',
+                    completed: false,
+                    notes: ''
+                });
+                setActiveModal('add');
+            };
+
+            // Pre-fill reset sample data
+            const handleResetSampleData = () => {
+                setEvents(SAMPLE_EVENTS);
+                setSelectedDate('2026-11-17');
+                setActiveModal(null);
+            };
+
+            return (
+                <div class="min-h-screen flex flex-col bg-slate-100 text-slate-800">
+                    
+                    {/* ================= HEADER CONTAINER (#aed500 LIME GREEN) ================= */}
+                    <header class="bg-[#aed500] text-[#162238] shadow-md border-b-2 border-[#162238]/10 sticky top-0 z-30">
+                        <div class="max-w-4xl mx-auto px-3 py-2.5 flex flex-col gap-2.5">
+                            
+                            {/* TOP BAR: Header title & Top Action Buttons */}
+                            <div class="flex items-center justify-between">
+                                {/* Right Side: Student Planner Title & Cap Icon */}
+                                <div class="flex items-center gap-2.5">
+                                    <div class="bg-[#162238] text-[#aed500] p-2 rounded-full shadow-md flex items-center justify-center">
+                                        <IconGraduationCap className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <h1 class="text-xl md:text-2xl font-black tracking-tight text-[#162238] leading-tight">
+                                            רוני סטודנט פלאנר
+                                        </h1>
+                                        <span class="text-[11px] font-bold opacity-80 block -mt-1">
+                                            {userSettings.institution}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Left Side: Pill Action Buttons */}
+                                <div class="flex items-center gap-1.5 sm:gap-2">
+                                    {/* Notifications Button */}
+                                    <button 
+                                        onClick={() => setActiveModal('notifications')}
+                                        class="relative bg-[#162238] hover:bg-[#233554] text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow transition-all active:scale-95"
+                                    >
+                                        <IconBell className="w-4 h-4 text-yellow-300" />
+                                        <span class="hidden sm:inline">התראות</span>
+                                        {notificationList.length > 0 && (
+                                            <span class="bg-red-500 text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center -ml-1">
+                                                {notificationList.length}
+                                            </span>
+                                        )}
+                                    </button>
+
+                                    {/* Import Button */}
+                                    <button 
+                                        onClick={() => setActiveModal('import')}
+                                        class="bg-[#162238] hover:bg-[#233554] text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow transition-all active:scale-95"
+                                    >
+                                        <IconFileExcel className="w-4 h-4 text-emerald-400" />
+                                        <span class="hidden sm:inline">ייבוא</span>
+                                    </button>
+
+                                    {/* Settings Button */}
+                                    <button 
+                                        onClick={() => setActiveModal('settings')}
+                                        title="הגדרות"
+                                        class="bg-[#162238] hover:bg-[#233554] text-white p-2 rounded-full text-xs font-bold flex items-center justify-center shadow transition-all active:scale-95"
+                                    >
+                                        <IconGear className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* SUB-HEADER ROW 2: View toggle, Month Navigator, 'היום' button */}
+                            <div class="flex items-center justify-between bg-[#162238]/10 p-1.5 rounded-2xl">
+                                
+                                {/* Right: 'היום' Button */}
+                                <button 
+                                    onClick={handleResetToday}
+                                    class="bg-[#162238] hover:bg-[#233554] text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow flex items-center gap-1.5 transition active:scale-95"
+                                >
+                                    <IconCalendar className="w-3.5 h-3.5 text-[#aed500]" />
+                                    <span>היום</span>
+                                </button>
+
+                                {/* Center: Month/Year Navigator with Arrows */}
+                                <div class="flex items-center gap-2">
+                                    <button 
+                                        onClick={handlePrevWeek}
+                                        title="שבוע קודם"
+                                        class="p-1 hover:bg-[#162238]/15 rounded-lg transition text-[#162238]"
+                                    >
+                                        <IconChevronRight className="w-5 h-5" />
+                                    </button>
+
+                                    <div class="flex items-center gap-1 font-black text-base sm:text-lg text-[#162238] px-2 py-0.5 rounded-lg bg-[#aed500] shadow-sm">
+                                        <span>{currentMonthYearLabel}</span>
+                                        <IconChevronDown className="w-4 h-4 opacity-70" />
+                                    </div>
+
+                                    <button 
+                                        onClick={handleNextWeek}
+                                        title="שבוע הבא"
+                                        class="p-1 hover:bg-[#162238]/15 rounded-lg transition text-[#162238]"
+                                    >
+                                        <IconChevronLeft className="w-5 h-5" />
+                                    </button>
+                                </div>
+
+                                {/* Left: View Mode Toggle Switch */}
+                                <div class="flex items-center bg-[#162238] p-0.5 rounded-xl text-xs font-bold text-white shadow">
+                                    <button 
+                                        onClick={() => setViewMode('daily')}
+                                        class={`px-2.5 py-1 rounded-lg transition ${viewMode === 'daily' ? 'bg-[#aed500] text-[#162238] shadow-sm font-black' : 'hover:text-slate-300'}`}
+                                    >
+                                        יומי
+                                    </button>
+                                    <button 
+                                        onClick={() => setViewMode('weekly')}
+                                        class={`px-2.5 py-1 rounded-lg transition ${viewMode === 'weekly' ? 'bg-[#aed500] text-[#162238] shadow-sm font-black' : 'hover:text-slate-300'}`}
+                                    >
+                                        שבועי
+                                    </button>
+                                    <button 
+                                        onClick={() => setViewMode('agenda')}
+                                        class={`px-2.5 py-1 rounded-lg transition ${viewMode === 'agenda' ? 'bg-[#aed500] text-[#162238] shadow-sm font-black' : 'hover:text-slate-300'}`}
+                                    >
+                                        רשימה
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* DAYS ROW (Sub-header 3): Sun - Sat Horizontal Selector */}
+                            <div class="grid grid-cols-7 gap-1 text-center">
+                                {currentWeekDays.map((dateObj, idx) => {
+                                    const dateISO = formatDateISO(dateObj);
+                                    const isSelected = dateISO === selectedDate;
+                                    const dayNum = dateObj.getDate();
+                                    const dayShortName = HEBREW_DAYS_SHORT[idx];
+
+                                    // Event dot indicator
+                                    const hasEvents = events.some(e => e.date === dateISO);
+
+                                    return (
+                                        <button 
+                                            key={dateISO}
+                                            onClick={() => setSelectedDate(dateISO)}
+                                            class={`flex flex-col items-center justify-center py-1.5 px-1 rounded-2xl transition-all ${
+                                                isSelected 
+                                                    ? 'bg-[#162238] text-white shadow-lg scale-105 font-bold ring-2 ring-[#162238]/30' 
+                                                    : 'text-[#162238] hover:bg-[#162238]/15 font-semibold'
+                                            }`}
+                                        >
+                                            <span class="text-[11px] opacity-80 leading-none">{dayShortName}</span>
+                                            <span class="text-base font-black leading-tight mt-0.5">{dayNum}</span>
+                                            {hasEvents && (
+                                                <span class={`w-1.5 h-1.5 rounded-full mt-0.5 ${isSelected ? 'bg-[#aed500]' : 'bg-[#162238]'}`}></span>
+                                            )}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                        </div>
+                    </header>
+
+                    {/* ================= DAY STATUS STRIP (Accordion Header) ================= */}
+                    <section class="bg-white border-b border-slate-200 shadow-sm sticky top-[152px] z-20">
+                        <div class="max-w-4xl mx-auto px-4 py-2.5 flex items-center justify-between">
+                            
+                            {/* Left Controls: Collapse toggle chevron & Badge */}
+                            <div class="flex items-center gap-3">
+                                <button 
+                                    onClick={() => setIsDayAccordionOpen(!isDayAccordionOpen)}
+                                    title={isDayAccordionOpen ? "כווץ תצוגה" : "הרחב תצוגה"}
+                                    class="p-1 hover:bg-slate-100 rounded-lg text-slate-600 transition flex items-center justify-center border border-slate-200"
+                                >
+                                    {isDayAccordionOpen ? <IconChevronUp className="w-5 h-5" /> : <IconChevronDown className="w-5 h-5" />}
+                                </button>
+
+                                <span class={`px-3 py-1 rounded-full text-xs font-bold border ${
+                                    selectedDayEvents.length > 0 
+                                        ? 'bg-slate-900 text-white border-slate-900' 
+                                        : 'bg-slate-100 text-slate-600 border-slate-200'
+                                }`}>
+                                    {selectedDayEvents.length} אירועים
+                                </span>
+                            </div>
+
+                            {/* Right Title: Full Hebrew Date */}
+                            <div class="flex items-center gap-2 text-slate-900 font-extrabold text-sm sm:text-base">
+                                <span>{formatHebrewFullDate(selectedDate)}</span>
+                                <IconCalendarCheck className="w-5 h-5 text-[#82a300]" />
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* ================= MAIN CONTENT VIEW CONTAINER ================= */}
+                    <main class="flex-1 max-w-4xl w-full mx-auto p-3 sm:p-4 flex flex-col gap-4 pb-28 min-h-[550px]">
+                        
+                        {/* VIEW 1: DAILY TIMELINE VIEW */}
+                        {viewMode === 'daily' && (
+                            <div class="flex flex-col gap-4">
+                                
+                                {/* Collapsed Alert Banner if user collapsed accordion */}
+                                {!isDayAccordionOpen && (
+                                    <div class="bg-amber-50 border border-amber-200 text-amber-900 p-3 rounded-2xl text-xs font-semibold flex items-center justify-between shadow-sm">
+                                        <span>תצוגת הלוח היומי מכווצת</span>
+                                        <button onClick={() => setIsDayAccordionOpen(true)} class="underline font-bold">
+                                            לחץ להרחבה
+                                        </button>
+                                    </div>
+                                )}
+
+                                {isDayAccordionOpen && (
+                                    <>
+                                        {/* SCHEDULED EVENTS CARDS LIST */}
+                                        {selectedDayEvents.length > 0 ? (
+                                            <div class="flex flex-col gap-3">
+                                                <div class="flex items-center justify-between text-xs font-bold text-slate-500 px-1">
+                                                    <span>סדר יום מתוכנן ({selectedDayEvents.length})</span>
+                                                    <span>לחץ על אירוע לעריכה</span>
+                                                </div>
+
+                                                {selectedDayEvents.map(event => {
+                                                    const typeMeta = EVENT_TYPES[event.type] || EVENT_TYPES['אירוע'];
+                                                    return (
+                                                        <div 
+                                                            key={event.id}
+                                                            onClick={() => { setEditingEvent(event); setActiveModal('add'); }}
+                                                            class={`group bg-white rounded-2xl p-4 border-2 shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                                                                event.completed ? 'opacity-60 bg-slate-50 border-slate-200' : 'border-slate-200/80 hover:border-slate-300'
+                                                            }`}
+                                                            style={{ borderRightColor: typeMeta.hex, borderRightWidth: '6px' }}
+                                                        >
+                                                            {/* Event Details */}
+                                                            <div class="flex items-start gap-3 flex-1">
+                                                                <button 
+                                                                    onClick={(e) => handleToggleComplete(event.id, e)}
+                                                                    title={event.completed ? "סמן כלא הושלם" : "סמן כהושלם"}
+                                                                    class={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition mt-0.5 ${
+                                                                        event.completed ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 hover:border-emerald-500'
+                                                                    }`}
+                                                                >
+                                                                    {event.completed && <IconCheck className="w-4 h-4" />}
+                                                                </button>
+
+                                                                <div class="flex flex-col gap-1 flex-1">
+                                                                    <div class="flex items-center gap-2 flex-wrap">
+                                                                        <span class={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${typeMeta.bg}`}>
+                                                                            {typeMeta.icon} {event.type}
+                                                                        </span>
+                                                                        <span class="text-xs font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md">
+                                                                            {event.course}
+                                                                        </span>
+                                                                        {event.priority === 'גבוהה' && (
+                                                                            <span class="text-[10px] font-black bg-red-100 text-red-700 px-2 py-0.5 rounded-md">
+                                                                                עדיפות גבוהה ⚡
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+
+                                                                    <h3 class={`text-base font-extrabold text-slate-900 ${event.completed ? 'line-through text-slate-500' : ''}`}>
+                                                                        {event.title}
+                                                                    </h3>
+
+                                                                    {event.notes && (
+                                                                        <p class="text-xs text-slate-600 line-clamp-2 mt-0.5 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                                                                            {event.notes}
+                                                                        </p>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Time & Location Metadata */}
+                                                            <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 border-slate-100 pt-2 sm:pt-0 gap-1.5 text-xs text-slate-600 min-w-[130px]">
+                                                                <div class="flex items-center gap-1.5 font-bold text-slate-900 bg-slate-100 px-2.5 py-1 rounded-lg">
+                                                                    <IconClock className="w-3.5 h-3.5 text-slate-600" />
+                                                                    <span>{event.startTime} - {event.endTime}</span>
+                                                                </div>
+
+                                                                {event.location && (
+                                                                    <div class="flex items-center gap-1 text-slate-500 text-[11px]">
+                                                                        <IconMapPin className="w-3.5 h-3.5" />
+                                                                        <span class="truncate max-w-[120px]">{event.location}</span>
+                                                                    </div>
+                                                                )}
+
+                                                                {/* Action controls */}
+                                                                <div class="flex items-center gap-2 opacity-80 group-hover:opacity-100 transition mt-1">
+                                                                    <button 
+                                                                        onClick={(e) => { e.stopPropagation(); setEditingEvent(event); setActiveModal('add'); }}
+                                                                        class="p-1 hover:bg-slate-200 rounded text-slate-600"
+                                                                        title="ערוך"
+                                                                    >
+                                                                        <IconEdit className="w-3.5 h-3.5" />
+                                                                    </button>
+                                                                    <button 
+                                                                        onClick={(e) => handleDeleteEvent(event.id, e)}
+                                                                        class="p-1 hover:bg-red-100 text-red-600 rounded"
+                                                                        title="מחק"
+                                                                    >
+                                                                        <IconTrash className="w-3.5 h-3.5" />
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        ) : (
+                                            /* BEAUTIFUL EMPTY STATE DESIGN WHEN 0 EVENTS ARE SCHEDULED */
+                                            <div class="bg-white rounded-3xl p-8 border-2 border-dashed border-slate-300 text-center flex flex-col items-center justify-center gap-3 shadow-sm my-2">
+                                                <div class="w-16 h-16 rounded-full bg-[#aed500]/20 text-[#162238] flex items-center justify-center text-2xl font-black shadow-inner">
+                                                    📅
+                                                </div>
+                                                <div>
+                                                    <h3 class="text-lg font-black text-slate-900">אין אירועים מתוכננים ליום זה</h3>
+                                                    <p class="text-xs text-slate-500 mt-1 max-w-sm">
+                                                        היום פנוי משיעורים ומטלות! לחץ על הלחצן <strong>+</strong> או בחר משבצת שעה למטה להוספת אירוע חדש.
+                                                    </p>
+                                                </div>
+                                                <div class="flex items-center gap-2 mt-2">
+                                                    <button 
+                                                        onClick={() => openAddForHour('09:00')}
+                                                        class="bg-[#162238] hover:bg-[#233554] text-white px-4 py-2 rounded-xl text-xs font-bold shadow flex items-center gap-1.5 transition active:scale-95"
+                                                    >
+                                                        <IconPlus className="w-4 h-4 text-[#aed500]" />
+                                                        <span>הוסף אירוע ליום זה</span>
+                                                    </button>
+                                                    <button 
+                                                        onClick={handleResetSampleData}
+                                                        class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl text-xs font-bold transition"
+                                                    >
+                                                        טען מערכת שעות לדוגמה
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* INTERACTIVE HOURLY TIMELINE GRID (08:00 to 20:00) */}
+                                        <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm mt-2">
+                                            <h4 class="text-xs font-bold text-slate-500 mb-3 flex items-center justify-between border-b border-slate-100 pb-2">
+                                                <span>לוח שעות יומי (08:00 - 20:00)</span>
+                                                <span class="text-[11px] font-normal text-slate-400">לחץ על שעה להוספת אירוע</span>
+                                            </h4>
+
+                                            <div class="flex flex-col divide-y divide-slate-100">
+                                                {['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'].map(hourStr => {
+                                                    const eventsInHour = selectedDayEvents.filter(e => e.startTime && e.startTime.startsWith(hourStr.substring(0, 2)));
+
+                                                    return (
+                                                        <div 
+                                                            key={hourStr}
+                                                            onClick={() => openAddForHour(hourStr)}
+                                                            class="group py-2 flex items-center gap-3 hover:bg-slate-50 rounded-lg px-2 transition cursor-pointer"
+                                                        >
+                                                            <span class="text-xs font-bold text-slate-500 w-12 text-left dir-ltr">
+                                                                {hourStr}
+                                                            </span>
+
+                                                            <div class="flex-1 min-h-[28px] flex items-center gap-2">
+                                                                {eventsInHour.length > 0 ? (
+                                                                    eventsInHour.map(ev => {
+                                                                        const typeMeta = EVENT_TYPES[ev.type] || EVENT_TYPES['אירוע'];
+                                                                        return (
+                                                                            <span 
+                                                                                key={ev.id}
+                                                                                class={`text-xs font-extrabold px-3 py-1 rounded-xl border shadow-sm flex items-center gap-1.5 ${typeMeta.bg}`}
+                                                                            >
+                                                                                <span class={`w-2 h-2 rounded-full ${typeMeta.dot}`}></span>
+                                                                                {ev.title} ({ev.startTime})
+                                                                            </span>
+                                                                        );
+                                                                    })
+                                                                ) : (
+                                                                    <span class="text-[11px] text-slate-300 opacity-0 group-hover:opacity-100 transition font-semibold flex items-center gap-1">
+                                                                        <IconPlus className="w-3 h-3 text-[#82a300]" /> הוסף אירוע ב-{hourStr}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+
+                            </div>
+                        )}
+
+                        {/* VIEW 2: WEEKLY GRID VIEW */}
+                        {viewMode === 'weekly' && (
+                            <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col gap-4">
+                                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                                    <h3 class="text-sm font-extrabold text-slate-900">תצוגה שבועית כוללת</h3>
+                                    <span class="text-xs text-slate-500">לחץ על יום למעבר לתצוגה מפורטת</span>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-7 gap-3">
+                                    {currentWeekDays.map((dateObj, idx) => {
+                                        const dateISO = formatDateISO(dateObj);
+                                        const isSelected = dateISO === selectedDate;
+                                        const dayEvents = events.filter(e => e.date === dateISO);
+                                        const dayName = HEBREW_DAYS_SHORT[idx];
+                                        const dayNum = dateObj.getDate();
+
+                                        return (
+                                            <div 
+                                                key={dateISO}
+                                                onClick={() => { setSelectedDate(dateISO); setViewMode('daily'); }}
+                                                class={`rounded-2xl p-3 border flex flex-col gap-2 min-h-[160px] cursor-pointer transition-all ${
+                                                    isSelected ? 'bg-slate-900 text-white border-slate-900 shadow-md' : 'bg-slate-50 hover:bg-slate-100 border-slate-200'
+                                                }`}
+                                            >
+                                                <div class="flex items-center justify-between border-b border-slate-200/40 pb-1.5">
+                                                    <span class="text-xs font-bold">{dayName}</span>
+                                                    <span class={`text-xs font-black px-1.5 py-0.5 rounded-md ${isSelected ? 'bg-[#aed500] text-slate-900' : 'bg-slate-200 text-slate-800'}`}>
+                                                        {dayNum}
+                                                    </span>
+                                                </div>
+
+                                                <div class="flex flex-col gap-1.5 flex-1 overflow-y-auto max-h-[220px]">
+                                                    {dayEvents.length > 0 ? (
+                                                        dayEvents.map(ev => {
+                                                            const typeMeta = EVENT_TYPES[ev.type] || EVENT_TYPES['אירוע'];
+                                                            return (
+                                                                <div 
+                                                                    key={ev.id}
+                                                                    class={`p-2 rounded-xl text-[11px] font-bold border shadow-xs leading-tight flex flex-col gap-0.5 ${
+                                                                        isSelected ? 'bg-slate-800 text-white border-slate-700' : `${typeMeta.bg}`
+                                                                    }`}
+                                                                >
+                                                                    <div class="flex items-center justify-between">
+                                                                        <span class="truncate max-w-[90px]">{ev.course}</span>
+                                                                        <span class="text-[9px] opacity-80 dir-ltr">{ev.startTime}</span>
+                                                                    </div>
+                                                                    <div class="font-extrabold truncate">{ev.title}</div>
+                                                                </div>
+                                                            );
+                                                        })
+                                                    ) : (
+                                                        <span class="text-[10px] text-slate-400 text-center my-auto italic">אין אירועים</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* VIEW 3: AGENDA / SEARCH LIST VIEW */}
+                        {viewMode === 'agenda' && (
+                            <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col gap-4">
+                                <div class="flex flex-col sm:flex-row items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                                    <h3 class="text-sm font-extrabold text-slate-900">רשימת כל המטלות והאירועים</h3>
+                                    
+                                    {/* Search Input */}
+                                    <div class="relative w-full sm:w-64">
+                                        <input 
+                                            type="text"
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            placeholder="חפש לפי שם קורס או אירוע..."
+                                            class="w-full pl-3 pr-8 py-1.5 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#82a300]"
+                                        />
+                                        <span class="absolute right-2.5 top-2 text-slate-400 text-xs">🔍</span>
+                                    </div>
+                                </div>
+
+                                {/* Category Filters */}
+                                <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs font-bold">
+                                    <button 
+                                        onClick={() => setFilterCategory('all')}
+                                        class={`px-3 py-1 rounded-full border transition ${filterCategory === 'all' ? 'bg-slate-900 text-white border-slate-900' : 'bg-slate-100 text-slate-700 border-slate-200'}`}
+                                    >
+                                        הכל ({events.length})
+                                    </button>
+                                    {Object.keys(EVENT_TYPES).map(typeKey => (
+                                        <button 
+                                            key={typeKey}
+                                            onClick={() => setFilterCategory(typeKey)}
+                                            class={`px-3 py-1 rounded-full border transition flex items-center gap-1 ${filterCategory === typeKey ? 'bg-slate-900 text-white border-slate-900' : 'bg-slate-100 text-slate-700 border-slate-200'}`}
+                                        >
+                                            <span>{EVENT_TYPES[typeKey].icon}</span>
+                                            <span>{typeKey}</span>
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* Agenda Event Items */}
+                                <div class="flex flex-col gap-2">
+                                    {events
+                                        .filter(ev => {
+                                            if (filterCategory !== 'all' && ev.type !== filterCategory) return false;
+                                            if (searchQuery && !ev.title.includes(searchQuery) && !ev.course.includes(searchQuery)) return false;
+                                            return true;
+                                        })
+                                        .sort((a,b) => a.date.localeCompare(b.date))
+                                        .map(event => {
+                                            const typeMeta = EVENT_TYPES[event.type] || EVENT_TYPES['אירוע'];
+                                            return (
+                                                <div 
+                                                    key={event.id}
+                                                    onClick={() => { setSelectedDate(event.date); setViewMode('daily'); }}
+                                                    class="p-3 rounded-2xl border border-slate-200 hover:border-slate-300 bg-slate-50 flex items-center justify-between gap-3 cursor-pointer transition"
+                                                >
+                                                    <div class="flex items-center gap-3">
+                                                        <span class={`text-xs font-bold px-2.5 py-1 rounded-xl ${typeMeta.bg}`}>
+                                                            {typeMeta.icon} {event.type}
+                                                        </span>
+                                                        <div>
+                                                            <div class="text-xs font-bold text-slate-500">{event.course} • {formatHebrewFullDate(event.date)}</div>
+                                                            <div class="text-sm font-extrabold text-slate-900">{event.title}</div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="text-xs font-bold bg-white px-2.5 py-1 rounded-lg border border-slate-200 dir-ltr">
+                                                            {event.startTime} - {event.endTime}
+                                                        </span>
+                                                        <button 
+                                                            onClick={(e) => handleDeleteEvent(event.id, e)}
+                                                            class="p-1 text-slate-400 hover:text-red-600 rounded"
+                                                        >
+                                                            <IconTrash className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                </div>
+                            </div>
+                        )}
+
+                    </main>
+
+                    {/* ================= FLOATING ACTION BUTTON (FAB) ================= */}
+                    <button 
+                        onClick={() => {
+                            setEditingEvent({
+                                title: '',
+                                course: 'חדוו"א 2א',
+                                type: 'הרצאה',
+                                date: selectedDate,
+                                startTime: '10:00',
+                                endTime: '12:00',
+                                location: '',
+                                priority: 'בינונית',
+                                completed: false,
+                                notes: ''
+                            });
+                            setActiveModal('add');
+                        }}
+                        title="הוסף אירוע או מטלה חדשה"
+                        class="fixed bottom-6 left-6 z-40 bg-[#aed500] hover:bg-[#9ec200] text-[#162238] w-14 h-14 rounded-full flex items-center justify-center shadow-2xl border-2 border-[#162238]/20 transition-all transform hover:scale-110 active:scale-95 focus:outline-none"
+                    >
+                        <IconPlus className="w-8 h-8 stroke-[3]" />
+                    </button>
+
+                    {/* ================= MODAL DIALOGS ================= */}
+                    {activeModal && (
+                        <div class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+                            
+                            {/* MODAL 1: ADD / EDIT EVENT MODAL */}
+                            {activeModal === 'add' && editingEvent && (
+                                <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 flex flex-col gap-4 dir-rtl my-8">
+                                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                                        <h2 class="text-lg font-black text-slate-900">
+                                            {editingEvent.id ? 'עריכת אירוע' : 'הוספת אירוע / מטלה חדשה'}
+                                        </h2>
+                                        <button onClick={() => setActiveModal(null)} class="p-1 text-slate-400 hover:text-slate-600">
+                                            <IconX className="w-5 h-5" />
+                                        </button>
+                                    </div>
+
+                                    <form onSubmit={(e) => { e.preventDefault(); handleSaveEvent(editingEvent); }} class="flex flex-col gap-3 text-xs font-bold text-slate-700">
+                                        
+                                        {/* Title */}
+                                        <div>
+                                            <label class="block mb-1">כותרת האירוע / המטלה *</label>
+                                            <input 
+                                                type="text" 
+                                                required
+                                                value={editingEvent.title} 
+                                                onChange={e => setEditingEvent({ ...editingEvent, title: e.target.value })}
+                                                placeholder="לדוגמה: הרצאה שבועית / הגשת תרגיל בית 3" 
+                                                class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#82a300] text-sm"
+                                            />
+                                        </div>
+
+                                        {/* Course Name with Quick Tags */}
+                                        <div>
+                                            <label class="block mb-1">שם הקורס *</label>
+                                            <input 
+                                                type="text" 
+                                                required
+                                                value={editingEvent.course} 
+                                                onChange={e => setEditingEvent({ ...editingEvent, course: e.target.value })}
+                                                placeholder="שם הקורס" 
+                                                class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#82a300] text-sm"
+                                            />
+                                            <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                                                <span class="text-[10px] text-slate-400 font-normal">תגיות מהירות:</span>
+                                                {['חדוו"א 2א', 'אלגברה לינארית', 'פיזיקה קלאסית', 'מבוא למדעי המחשב', 'אישי'].map(tag => (
+                                                    <button 
+                                                        type="button" 
+                                                        key={tag}
+                                                        onClick={() => setEditingEvent({ ...editingEvent, course: tag })}
+                                                        class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 py-0.5 rounded-md text-[10px]"
+                                                    >
+                                                        {tag}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Type Selector */}
+                                        <div>
+                                            <label class="block mb-1">סוג האירוע</label>
+                                            <div class="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
+                                                {Object.keys(EVENT_TYPES).map(typeKey => (
+                                                    <button 
+                                                        type="button"
+                                                        key={typeKey}
+                                                        onClick={() => setEditingEvent({ ...editingEvent, type: typeKey })}
+                                                        class={`py-1.5 px-2 rounded-xl text-xs font-extrabold border transition flex flex-col items-center gap-0.5 ${
+                                                            editingEvent.type === typeKey ? 'bg-slate-900 text-white border-slate-900 shadow-sm' : 'bg-slate-50 text-slate-700 border-slate-200'
+                                                        }`}
+                                                    >
+                                                        <span>{EVENT_TYPES[typeKey].icon}</span>
+                                                        <span>{typeKey}</span>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Date & Time Row */}
+                                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                            <div>
+                                                <label class="block mb-1">תאריך</label>
+                                                <input 
+                                                    type="date" 
+                                                    required
+                                                    value={editingEvent.date} 
+                                                    onChange={e => setEditingEvent({ ...editingEvent, date: e.target.value })}
+                                                    class="w-full px-3 py-1.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#82a300]"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label class="block mb-1">שעת התחלה</label>
+                                                <input 
+                                                    type="time" 
+                                                    required
+                                                    value={editingEvent.startTime} 
+                                                    onChange={e => setEditingEvent({ ...editingEvent, startTime: e.target.value })}
+                                                    class="w-full px-3 py-1.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#82a300] dir-ltr"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label class="block mb-1">שעת סיום</label>
+                                                <input 
+                                                    type="time" 
+                                                    required
+                                                    value={editingEvent.endTime} 
+                                                    onChange={e => setEditingEvent({ ...editingEvent, endTime: e.target.value })}
+                                                    class="w-full px-3 py-1.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#82a300] dir-ltr"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Location & Priority */}
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                            <div>
+                                                <label class="block mb-1">מיקום / אולם</label>
+                                                <input 
+                                                    type="text" 
+                                                    value={editingEvent.location || ''} 
+                                                    onChange={e => setEditingEvent({ ...editingEvent, location: e.target.value })}
+                                                    placeholder="אולם 101 / Moodle / בזום" 
+                                                    class="w-full px-3 py-1.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#82a300]"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label class="block mb-1">רמת עדיפות</label>
+                                                <select 
+                                                    value={editingEvent.priority || 'בינונית'}
+                                                    onChange={e => setEditingEvent({ ...editingEvent, priority: e.target.value })}
+                                                    class="w-full px-3 py-1.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#82a300]"
+                                                >
+                                                    <option value="נמוכה">נמוכה</option>
+                                                    <option value="בינונית">בינונית</option>
+                                                    <option value="גבוהה">גבוהה ⚡</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        {/* Notes */}
+                                        <div>
+                                            <label class="block mb-1">הערות ופירוט</label>
+                                            <textarea 
+                                                rows="2"
+                                                value={editingEvent.notes || ''} 
+                                                onChange={e => setEditingEvent({ ...editingEvent, notes: e.target.value })}
+                                                placeholder="נושאי לימוד, דגשים מיוחדים, קישורים..." 
+                                                class="w-full px-3 py-1.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#82a300]"
+                                            ></textarea>
+                                        </div>
+
+                                        {/* Form Actions */}
+                                        <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-3 mt-2">
+                                            <button 
+                                                type="button"
+                                                onClick={() => setActiveModal(null)}
+                                                class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-bold"
+                                            >
+                                                ביטול
+                                            </button>
+                                            <button 
+                                                type="submit"
+                                                class="bg-[#162238] hover:bg-[#233554] text-white px-5 py-2 rounded-xl font-black shadow transition active:scale-95"
+                                            >
+                                                שמור אירוע
+                                            </button>
+                                        </div>
+
+                                    </form>
+                                </div>
+                            )}
+
+                            {/* MODAL 2: NOTIFICATIONS MODAL */}
+                            {activeModal === 'notifications' && (
+                                <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 flex flex-col gap-4 dir-rtl">
+                                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                                        <div class="flex items-center gap-2">
+                                            <IconBell className="w-5 h-5 text-amber-500" />
+                                            <h2 class="text-lg font-black text-slate-900">התראות ומטלות קרובות</h2>
+                                        </div>
+                                        <button onClick={() => setActiveModal(null)} class="p-1 text-slate-400 hover:text-slate-600">
+                                            <IconX className="w-5 h-5" />
+                                        </button>
+                                    </div>
+
+                                    <div class="flex flex-col gap-2 max-h-80 overflow-y-auto">
+                                        {notificationList.length > 0 ? (
+                                            notificationList.map(item => (
+                                                <div key={item.id} class="p-3 rounded-2xl bg-amber-50 border border-amber-200 flex items-start gap-3">
+                                                    <span class="text-lg">⚡</span>
+                                                    <div class="flex-1 text-xs">
+                                                        <div class="font-extrabold text-amber-900">{item.title} ({item.course})</div>
+                                                        <div class="text-amber-700 mt-0.5">תאריך יעד: {formatHebrewFullDate(item.date)}</div>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div class="text-center py-8 text-xs text-slate-500">
+                                                אין התראות חדשות! כל המטלות והמבחנים מטופלים.
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <button 
+                                        onClick={() => setActiveModal(null)}
+                                        class="w-full bg-slate-900 text-white font-bold py-2 rounded-xl text-xs"
+                                    >
+                                        סגור
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* MODAL 3: IMPORT / EXPORT MODAL */}
+                            {activeModal === 'import' && (
+                                <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 flex flex-col gap-4 dir-rtl">
+                                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                                        <div class="flex items-center gap-2">
+                                            <IconFileExcel className="w-5 h-5 text-emerald-600" />
+                                            <h2 class="text-lg font-black text-slate-900">ייבוא וייצוא נתונים</h2>
+                                        </div>
+                                        <button onClick={() => setActiveModal(null)} class="p-1 text-slate-400 hover:text-slate-600">
+                                            <IconX className="w-5 h-5" />
+                                        </button>
+                                    </div>
+
+                                    <p class="text-xs text-slate-600">
+                                        תוכל לקשר את מערכת השעות שלך מ-Excel, Moodle או לחזור לנתוני ברירת המחדל.
+                                    </p>
+
+                                    <div class="flex flex-col gap-2">
+                                        <button 
+                                            onClick={handleResetSampleData}
+                                            class="w-full bg-[#aed500] hover:bg-[#9ec200] text-[#162238] font-black p-3 rounded-2xl text-xs shadow transition flex items-center justify-center gap-2"
+                                        >
+                                            <span>🔄 טען מערכת שעות מלאה לדוגמה (נובמבר 2026)</span>
+                                        </button>
+
+                                        <button 
+                                            onClick={() => {
+                                                const jsonStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(events, null, 2));
+                                                const dlAnchor = document.createElement('a');
+                                                dlAnchor.setAttribute("href", jsonStr);
+                                                dlAnchor.setAttribute("download", "roni_planner_backup.json");
+                                                document.body.appendChild(dlAnchor);
+                                                dlAnchor.click();
+                                                dlAnchor.remove();
+                                            }}
+                                            class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold p-3 rounded-2xl text-xs transition flex items-center justify-center gap-2 border border-slate-200"
+                                        >
+                                            <span>💾 ייצא גיבוי לוח שנה (JSON)</span>
+                                        </button>
+                                    </div>
+
+                                    <button 
+                                        onClick={() => setActiveModal(null)}
+                                        class="w-full bg-slate-900 text-white font-bold py-2 rounded-xl text-xs mt-2"
+                                    >
+                                        סגור
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* MODAL 4: SETTINGS MODAL */}
+                            {activeModal === 'settings' && (
+                                <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 flex flex-col gap-4 dir-rtl">
+                                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                                        <div class="flex items-center gap-2">
+                                            <IconGear className="w-5 h-5 text-slate-700" />
+                                            <h2 class="text-lg font-black text-slate-900">הגדרות פלאנר</h2>
+                                        </div>
+                                        <button onClick={() => setActiveModal(null)} class="p-1 text-slate-400 hover:text-slate-600">
+                                            <IconX className="w-5 h-5" />
+                                        </button>
+                                    </div>
+
+                                    <div class="flex flex-col gap-3 text-xs font-bold text-slate-700">
+                                        <div>
+                                            <label class="block mb-1">שם הסטודנט / הסטודנטית</label>
+                                            <input 
+                                                type="text" 
+                                                value={userSettings.studentName}
+                                                onChange={e => setUserSettings({ ...userSettings, studentName: e.target.value })}
+                                                class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none text-sm"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label class="block mb-1">מוסד לימודים</label>
+                                            <input 
+                                                type="text" 
+                                                value={userSettings.institution}
+                                                onChange={e => setUserSettings({ ...userSettings, institution: e.target.value })}
+                                                class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none text-sm"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <button 
+                                        onClick={() => setActiveModal(null)}
+                                        class="w-full bg-slate-900 text-white font-bold py-2 rounded-xl text-xs mt-2"
+                                    >
+                                        שמור וסגור
+                                    </button>
+                                </div>
+                            )}
+
+                        </div>
+                    )}
+
+                </div>
+            );
         }
 
-        // --- SCHEDULE LIST RENDERER ---
-        function renderSelectedDaySchedule() {
-            const container = document.getElementById('scheduleList');
-            if (!container) return;
-            container.innerHTML = '';
-
-            const date = state.selectedDate;
-            const daysHe = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
-            const monthsHe = ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני', 'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'];
-
-            const dateStr = `יום ${daysHe[date.getDay()]} ${date.getDate()} ${monthsHe[date.getMonth()]} ${date.getFullYear()}`;
-            const selectedDateTitleEl = document.getElementById('selectedDateTitle');
-            if (selectedDateTitleEl) selectedDateTitleEl.textContent = dateStr;
-
-            const dayEvents = getEventsForDate(date);
-            const dayTaskSteps = getTaskStepsForDate(date);
-            const totalItems = dayEvents.length + dayTaskSteps.length;
-
-            const dayEventsCountEl = document.getElementById('dayEventsCount');
-            if (dayEventsCountEl) dayEventsCountEl.textContent = `${totalItems} אירועים`;
-
-            if (totalItems === 0) {
-                container.innerHTML = `
-                    <div class="flex flex-col items-center justify-center py-12 text-slate-400 gap-2">
-                        <i class="fa-solid fa-calendar-xmark text-4xl text-slate-300"></i>
-                        <span class="text-xs font-semibold">אין שיעורים, בחינות או משימות ליום זה</span>
-                        <div class="flex gap-2 mt-2">
-                            <button onclick="openAddTaskModal()" class="text-xs text-onoLimeDark font-bold hover:underline flex items-center gap-1">
-                                <i class="fa-solid fa-plus-circle"></i> הוסף משימה / קורס
-                            </button>
-                            <span class="text-slate-300">|</span>
-                            <button onclick="openExcelImportModal()" class="text-xs text-slate-600 font-bold hover:underline flex items-center gap-1">
-                                <i class="fa-solid fa-file-excel text-emerald-600"></i> ייבא קובץ אקסל
-                            </button>
-                        </div>
-                    </div>
-                `;
-                return;
+        // Render React Application safely after DOM load
+        window.addEventListener('DOMContentLoaded', () => {
+            const rootElement = document.getElementById('root');
+            if (rootElement) {
+                const root = ReactDOM.createRoot(rootElement);
+                root.render(<MainApp />);
             }
-
-            if (dayEvents.length > 0) {
-                const coursesSection = document.createElement('div');
-                coursesSection.className = 'space-y-2.5';
-                
-                dayEvents.forEach(evt => {
-                    const
+        });
+    </script>
+</body>
+</html>
