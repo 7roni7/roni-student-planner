@@ -5,14 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#a8d100" id="metaThemeColor">
     <meta name="description" content="רוני סטודנט פלאנר - ניהול עומסי לימודים, מערכת שעות ומשימות לסטודנטים">
+    
     <title>רוני סטודנט פלאנר</title>
+
+    <!-- Dynamic PWA Manifest Link -->
     <link id="manifestLink" rel="manifest">
+    
+    <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><path fill='%23a8d100' d='M0 0h512v512H0z'/><path fill='%230f172a' d='M256 120L32 216l224 96 176-75.4V360h32V216L256 120z'/></svg>">
+
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Rubik -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- SheetJS for Excel Reading -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
     <script>
@@ -25,32 +35,86 @@
                         onoLimeLight: 'var(--theme-light, #d4f238)',
                         onoDark: '#0f172a'
                     },
-                    fontFamily: { sans: ['Rubik', 'sans-serif'] }
+                    fontFamily: {
+                        sans: ['Rubik', 'sans-serif'],
+                    }
                 }
             }
         }
     </script>
+
     <style id="dynamicThemeStyles">
-        :root { --theme-primary: #a8d100; --theme-dark: #8ea800; --theme-light: #d4f238; --theme-text: #0f172a; }
-        * { box-sizing: border-box; touch-action: manipulation; }
-        body { font-family: 'Rubik', sans-serif; background-color: #f8fafc; user-select: none; margin: 0; padding: 0; height: 100%; }
-        .theme-bg-primary { background-color: var(--theme-primary) !important; }
-        .theme-text-primary { color: var(--theme-primary) !important; }
-        .theme-border-primary { border-color: var(--theme-primary) !important; }
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        .day-cell { min-height: 48px; }
-        .animate-pop { animation: pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes pop { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .canceled-course-card { background-color: rgba(239, 68, 68, 0.12) !important; border-right: 6px solid #ef4444 !important; }
-        .manual-course-card { background-color: rgba(254, 240, 138, 0.75) !important; border-right: 6px solid #eab308 !important; }
+        :root {
+            --theme-primary: #a8d100;
+            --theme-dark: #8ea800;
+            --theme-light: #d4f238;
+            --theme-text: #0f172a;
+        }
+        * {
+            box-sizing: border-box;
+            touch-action: manipulation;
+        }
+        body {
+            font-family: 'Rubik', sans-serif;
+            background-color: #f8fafc;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+        .theme-bg-primary {
+            background-color: var(--theme-primary) !important;
+        }
+        .theme-text-primary {
+            color: var(--theme-primary) !important;
+        }
+        .theme-border-primary {
+            border-color: var(--theme-primary) !important;
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .day-cell {
+            min-height: 48px;
+        }
+        .animate-pop {
+            animation: pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes pop {
+            0% { transform: scale(0.95); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .canceled-course-card {
+            background-color: rgba(239, 68, 68, 0.12) !important;
+            border-right: 6px solid #ef4444 !important;
+        }
+        .manual-course-card {
+            background-color: rgba(254, 240, 138, 0.75) !important;
+            border-right: 6px solid #eab308 !important;
+        }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 antialiased h-full flex flex-col justify-between">
 
+    <!-- Container -->
     <div class="w-full max-w-md mx-auto bg-white min-h-full flex flex-col relative overflow-hidden shadow-none sm:shadow-2xl sm:rounded-3xl sm:my-2">
+
         <!-- HEADER BAR -->
         <header id="mainHeaderBar" class="theme-bg-primary text-slate-900 px-3.5 py-3 sticky top-0 z-30 shadow-xs shrink-0 flex flex-col gap-2 transition-colors duration-300">
             <div class="flex items-center justify-between">
@@ -60,46 +124,96 @@
                     </div>
                     <h1 class="text-sm sm:text-base font-black tracking-tight">רוני סטודנט פלאנר</h1>
                 </div>
+
                 <div class="flex items-center gap-1.5">
-                    <button onclick="openBlockedTimesModal()" class="bg-slate-900 hover:bg-slate-800 text-white p-2 rounded-xl transition shadow-xs" title="הגדרות"><i class="fa-solid fa-gear theme-text-primary text-xs"></i></button>
-                    <button id="pwaInstallBtn" onclick="installPWA()" class="hidden bg-slate-900 text-white text-[11px] font-bold px-2 py-1.5 rounded-xl shadow-xs animate-bounce"><i class="fa-solid fa-mobile-screen-button theme-text-primary text-xs"></i> <span>📲 התקן</span></button>
-                    <button onclick="openExcelImportModal()" class="bg-slate-900 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-xl shadow-xs"><i class="fa-solid fa-file-excel theme-text-primary text-xs"></i> <span>ייבוא</span></button>
-                    <button onclick="requestNotificationPermission()" id="notifBtn" class="bg-slate-900 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-xl shadow-xs"><i class="fa-solid fa-bell theme-text-primary text-xs" id="notifBtnIcon"></i> <span id="notifBtnText">התראות</span></button>
+                    <button onclick="openBlockedTimesModal()" class="bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold p-2 rounded-xl transition flex items-center justify-center shadow-xs" title="הגדרות מערכת, עיצוב וזמנים חסומים">
+                        <i class="fa-solid fa-gear theme-text-primary text-xs"></i>
+                    </button>
+
+                    <button id="pwaInstallBtn" onclick="installPWA()" class="hidden bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold px-2 py-1.5 rounded-xl transition flex items-center gap-1 shadow-xs animate-bounce">
+                        <i class="fa-solid fa-mobile-screen-button theme-text-primary text-xs"></i>
+                        <span>📲 התקן</span>
+                    </button>
+
+                    <button onclick="openExcelImportModal()" class="bg-slate-900/90 hover:bg-slate-900 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-xl transition flex items-center gap-1 shadow-xs">
+                        <i class="fa-solid fa-file-excel theme-text-primary text-xs"></i>
+                        <span>ייבוא</span>
+                    </button>
+
+                    <button onclick="requestNotificationPermission()" id="notifBtn" class="bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-xl transition flex items-center gap-1 shadow-xs">
+                        <i class="fa-solid fa-bell theme-text-primary text-xs" id="notifBtnIcon"></i>
+                        <span id="notifBtnText">התראות</span>
+                    </button>
                 </div>
             </div>
+
+            <!-- Calendar Navigation Row -->
             <div class="flex items-center justify-between pt-1 border-t border-slate-900/10">
-                <button id="viewToggleBtn" onclick="toggleCalendarView()" class="p-1.5 text-slate-900 hover:bg-black/10 rounded-xl transition flex items-center gap-1 text-xs font-bold"><i id="viewToggleIcon" class="fa-solid fa-calendar-week text-sm"></i><span id="viewToggleLabel">שבועי</span></button>
+                <button id="viewToggleBtn" onclick="toggleCalendarView()" class="p-1.5 text-slate-900 hover:bg-black/10 rounded-xl transition flex items-center gap-1 text-xs font-bold">
+                    <i id="viewToggleIcon" class="fa-solid fa-calendar-week text-sm"></i>
+                    <span id="viewToggleLabel">שבועי</span>
+                </button>
+
                 <div class="flex items-center gap-2">
-                    <button onclick="navigateDate(-1)" class="p-1.5 hover:bg-black/10 rounded-full"><i class="fa-solid fa-chevron-right text-sm"></i></button>
-                    <button onclick="openMonthYearPickerModal()" class="text-sm font-black text-slate-900 hover:bg-black/10 px-2 py-1 rounded-xl transition flex items-center gap-1.5"><span id="calendarTitle">נוב' 2026</span><i class="fa-solid fa-caret-down text-xs"></i></button>
-                    <button onclick="navigateDate(1)" class="p-1.5 hover:bg-black/10 rounded-full"><i class="fa-solid fa-chevron-left text-sm"></i></button>
+                    <button onclick="navigateDate(-1)" class="p-1.5 hover:bg-black/10 rounded-full transition" title="אחורה">
+                        <i class="fa-solid fa-chevron-right text-sm"></i>
+                    </button>
+
+                    <button onclick="openMonthYearPickerModal()" class="text-sm font-black text-slate-900 hover:bg-black/10 px-2 py-1 rounded-xl transition flex items-center gap-1.5">
+                        <span id="calendarTitle">נוב' 2026</span>
+                        <i class="fa-solid fa-caret-down text-xs text-slate-700"></i>
+                    </button>
+
+                    <button onclick="navigateDate(1)" class="p-1.5 hover:bg-black/10 rounded-full transition" title="קדימה">
+                        <i class="fa-solid fa-chevron-left text-sm"></i>
+                    </button>
                 </div>
-                <button onclick="goToToday()" class="p-1.5 text-slate-900 hover:bg-black/10 rounded-xl transition text-xs font-bold"><i class="fa-solid fa-calendar-day text-sm"></i> <span>היום</span></button>
+
+                <button onclick="goToToday()" class="p-1.5 text-slate-900 hover:bg-black/10 rounded-xl transition flex items-center gap-1 text-xs font-bold">
+                    <i class="fa-solid fa-calendar-day text-sm"></i>
+                    <span>היום</span>
+                </button>
             </div>
+
             <div class="grid grid-cols-7 text-center font-black text-[11px] text-slate-900 pt-1">
-                <div>יום א'</div><div>יום ב'</div><div>יום ג'</div><div>יום ד'</div><div>יום ה'</div><div>יום ו'</div><div>שבת</div>
+                <div>יום א'</div>
+                <div>יום ב'</div>
+                <div>יום ג'</div>
+                <div>יום ד'</div>
+                <div>יום ה'</div>
+                <div>יום ו'</div>
+                <div>שבת</div>
             </div>
         </header>
 
+        <!-- CALENDAR GRID CONTAINER -->
         <div id="calendarGrid" class="bg-white p-2 border-b border-slate-200 shrink-0"></div>
 
-        <div class="bg-slate-100/90 border-t border-b border-slate-200 px-4 py-2 flex justify-between items-center sticky top-[112px] shrink-0 backdrop-blur-xs z-10">
+        <!-- SELECTED DAY HEADER -->
+        <div class="bg-slate-100/90 border-t border-b border-slate-200/90 px-4 py-2 flex justify-between items-center z-10 sticky top-[112px] shrink-0 backdrop-blur-xs">
             <div class="flex items-center gap-2">
                 <i class="fa-regular fa-calendar-check theme-text-primary font-bold text-sm"></i>
                 <span id="selectedDateTitle" class="font-bold text-slate-800 text-xs sm:text-sm">יום שלישי 17 נובמבר 2026</span>
             </div>
             <div class="flex items-center gap-1.5">
                 <span id="dayEventsCount" class="text-[11px] bg-slate-200 text-slate-700 font-extrabold px-2 py-0.5 rounded-full">0 אירועים</span>
-                <button onclick="toggleSheetExpand()" class="text-slate-500 hover:text-slate-800 p-1"><i id="expandSheetIcon" class="fa-solid fa-chevron-up text-xs"></i></button>
+                <button onclick="toggleSheetExpand()" class="text-slate-500 hover:text-slate-800 p-1 transition">
+                    <i id="expandSheetIcon" class="fa-solid fa-chevron-up text-xs"></i>
+                </button>
             </div>
         </div>
 
+        <!-- SCHEDULE PANEL -->
         <main id="scheduleList" class="flex-1 overflow-y-auto p-3.5 space-y-4 bg-slate-50/70 pb-20"></main>
 
-        <button id="floatingAddBtn" onclick="openAddTaskModal()" class="fixed sm:absolute bottom-5 left-5 z-40 theme-bg-primary text-slate-900 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-2xl font-black border-2 border-white"><i class="fa-solid fa-plus"></i></button>
+        <!-- FLOATING TASK ADD BUTTON (+) -->
+        <button id="floatingAddBtn" onclick="openAddTaskModal()" class="fixed sm:absolute bottom-5 left-5 z-40 theme-bg-primary text-slate-900 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-2xl font-black transition-transform transform active:scale-90 border-2 border-white focus:outline-none">
+            <i class="fa-solid fa-plus"></i>
+        </button>
+
     </div>
 
-    <!-- SETTINGS & BLOCKED HOURS MODAL -->
+    <!-- SETTINGS & FAMILY TIME / BLOCKED HOURS MODAL -->
     <div id="blockedTimesModal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs hidden flex items-center justify-center p-3 sm:p-4">
         <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-pop border border-slate-100">
             <div class="bg-slate-900 text-white px-5 py-3.5 flex justify-between items-center shrink-0 border-b border-slate-800">
@@ -107,27 +221,42 @@
                     <i class="fa-solid fa-gear theme-text-primary text-lg"></i>
                     <h2 class="text-sm font-black">הגדרות מערכת, עיצוב וזמנים חסומים</h2>
                 </div>
-                <button onclick="closeBlockedTimesModal()" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <button onclick="closeBlockedTimesModal()" class="text-slate-400 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
             </div>
             
             <div class="p-4 overflow-y-auto space-y-4 text-xs flex-1 bg-slate-50">
+                <!-- THEME COLOR PICKER SECTION -->
                 <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
                     <div class="flex items-center justify-between">
-                        <span class="font-black text-slate-800 text-xs flex items-center gap-1.5"><i class="fa-solid fa-palette theme-text-primary text-sm"></i> בחירת צבע רקע וערכת נושא</span>
+                        <span class="font-black text-slate-800 text-xs flex items-center gap-1.5">
+                            <i class="fa-solid fa-palette theme-text-primary text-sm"></i>
+                            בחירת צבע רקע וערכת נושא
+                        </span>
                         <input type="color" id="themeColorInput" onchange="applyCustomThemeColor(this.value)" class="w-8 h-8 rounded-lg cursor-pointer border-0 p-0 bg-transparent">
                     </div>
+                    <p class="text-[11px] text-slate-500">בחר צבע מגלגל הצבעים לשינוי הצבע הירוק הכללי ביומן ובכפתורים:</p>
                     <div class="flex gap-2 flex-wrap">
-                        <button onclick="applyCustomThemeColor('#a8d100')" class="w-7 h-7 rounded-full bg-[#a8d100] border-2 border-white shadow-xs hover:scale-110 transition"></button>
-                        <button onclick="applyCustomThemeColor('#10b981')" class="w-7 h-7 rounded-full bg-[#10b981] border-2 border-white shadow-xs hover:scale-110 transition"></button>
-                        <button onclick="applyCustomThemeColor('#0284c7')" class="w-7 h-7 rounded-full bg-[#0284c7] border-2 border-white shadow-xs hover:scale-110 transition"></button>
-                        <button onclick="applyCustomThemeColor('#8b5cf6')" class="w-7 h-7 rounded-full bg-[#8b5cf6] border-2 border-white shadow-xs hover:scale-110 transition"></button>
-                        <button onclick="applyCustomThemeColor('#f43f5e')" class="w-7 h-7 rounded-full bg-[#f43f5e] border-2 border-white shadow-xs hover:scale-110 transition"></button>
-                        <button onclick="applyCustomThemeColor('#f59e0b')" class="w-7 h-7 rounded-full bg-[#f59e0b] border-2 border-white shadow-xs hover:scale-110 transition"></button>
+                        <button onclick="applyCustomThemeColor('#a8d100')" class="w-7 h-7 rounded-full bg-[#a8d100] border-2 border-white shadow-xs hover:scale-110 transition" title="ירוק אליפסה (ברירת מחדל)"></button>
+                        <button onclick="applyCustomThemeColor('#10b981')" class="w-7 h-7 rounded-full bg-[#10b981] border-2 border-white shadow-xs hover:scale-110 transition" title="אמרלד"></button>
+                        <button onclick="applyCustomThemeColor('#0284c7')" class="w-7 h-7 rounded-full bg-[#0284c7] border-2 border-white shadow-xs hover:scale-110 transition" title="כחול אוקיינוס"></button>
+                        <button onclick="applyCustomThemeColor('#8b5cf6')" class="w-7 h-7 rounded-full bg-[#8b5cf6] border-2 border-white shadow-xs hover:scale-110 transition" title="סגול"></button>
+                        <button onclick="applyCustomThemeColor('#f43f5e')" class="w-7 h-7 rounded-full bg-[#f43f5e] border-2 border-white shadow-xs hover:scale-110 transition" title="וורוד"></button>
+                        <button onclick="applyCustomThemeColor('#f59e0b')" class="w-7 h-7 rounded-full bg-[#f59e0b] border-2 border-white shadow-xs hover:scale-110 transition" title="כתום מוזהב"></button>
                     </div>
                 </div>
 
+                <!-- BLOCKED HOURS SECTION -->
                 <div class="space-y-2">
-                    <h3 class="font-black text-slate-800 text-xs flex items-center gap-1.5"><i class="fa-solid fa-clock-slash text-amber-500 text-sm"></i> זמנים חסומים / זמן משפחה</h3>
+                    <h3 class="font-black text-slate-800 text-xs flex items-center gap-1.5">
+                        <i class="fa-solid fa-clock-slash text-amber-500 text-sm"></i>
+                        זמנים חסומים / זמן משפחה
+                    </h3>
+                    <p class="text-[11px] text-slate-600 bg-amber-50 p-2.5 rounded-xl border border-amber-200">
+                        <i class="fa-solid fa-circle-info text-amber-600"></i>
+                        הזמנים שתגדיר כאן לא יופיעו ביומן, אך המערכת תימנע באופן מוחלט משבוץ משימות בשעות אלו.
+                    </p>
                     <div id="blockedTimesDaysContainer" class="space-y-3 pt-1"></div>
                 </div>
             </div>
@@ -139,12 +268,14 @@
         </div>
     </div>
 
-    <!-- MONTH & YEAR PICKER MODAL -->
+    <!-- MONTH & YEAR SELECTOR MODAL -->
     <div id="monthYearPickerModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-xs rounded-2xl shadow-2xl p-4 animate-pop border border-slate-100 space-y-4">
             <div class="flex justify-between items-center border-b pb-2">
                 <h3 class="font-extrabold text-sm text-slate-800">מעבר מהיר לחודש ושנה</h3>
-                <button onclick="closeMonthYearPickerModal()" class="text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <button onclick="closeMonthYearPickerModal()" class="text-slate-400 hover:text-slate-700">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
             </div>
             <div class="grid grid-cols-2 gap-3">
                 <div>
@@ -174,11 +305,13 @@
                     <span id="courseModalBadge" class="text-[10px] theme-bg-primary text-slate-900 font-black px-2 py-0.5 rounded-md inline-block mb-1">פרטי שיעור</span>
                     <h2 id="courseModalTitle" class="text-sm font-black text-white">שם הקורס</h2>
                 </div>
-                <button onclick="closeCourseDetailModal()" class="text-slate-400 hover:text-white p-1 rounded-full transition"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <button onclick="closeCourseDetailModal()" class="text-slate-400 hover:text-white p-1 rounded-full transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
             </div>
             <div class="p-5 space-y-4 text-xs">
                 <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-2">
-                    <div class="flex justify-between items-center"><span class="text-slate-500 font-bold">שעות (24 שעות):</span><span id="courseModalTime" class="font-black text-slate-800">08:30 - 10:00</span></div>
+                    <div class="flex justify-between items-center"><span class="text-slate-500 font-bold">שעות (24h):</span><span id="courseModalTime" class="font-black text-slate-800">08:30 - 10:00</span></div>
                     <div class="flex justify-between items-center"><span class="text-slate-500 font-bold">תאריך:</span><span id="courseModalDate" class="font-bold text-slate-800">17/11/2026</span></div>
                     <div class="flex justify-between items-center"><span class="text-slate-500 font-bold">מרצה / פרטים:</span><span id="courseModalInstructor" class="font-bold text-slate-800">-</span></div>
                 </div>
@@ -210,7 +343,7 @@
         </div>
     </div>
 
-    <!-- TASK DETAIL MODAL WITH EDITABLE ALLOCATED MINUTES & REORDERING -->
+    <!-- TASK DETAIL POPUP MODAL -->
     <div id="taskDetailModal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-pop border border-slate-100">
             <div id="taskModalHeader" class="px-5 py-4 bg-slate-900 text-white flex justify-between items-center shrink-0 border-b border-slate-800">
@@ -221,98 +354,135 @@
                         <h2 id="taskModalTitle" class="text-sm font-black text-white">שם המשימה</h2>
                     </div>
                 </div>
-                <button onclick="closeTaskDetailModal()" class="text-slate-400 hover:text-white p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <button onclick="closeTaskDetailModal()" class="text-slate-400 hover:text-white p-1 rounded-full transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
             </div>
 
             <div class="p-5 overflow-y-auto space-y-4 text-xs flex-1">
-                <div onclick="openChainRescheduleModalFromTask()" class="bg-amber-50 hover:bg-amber-100 border-2 border-dashed border-amber-300 p-3.5 rounded-2xl cursor-pointer transition space-y-2">
+                <!-- CLICKABLE TIME / DATE CARD FOR CHAIN RESCHEDULING -->
+                <div onclick="openChainRescheduleModalFromTask()" class="bg-amber-50 hover:bg-amber-100 border-2 border-dashed border-amber-300 p-4 rounded-2xl cursor-pointer transition space-y-2 group" title="לחץ כאן לפתיחת מסך שיבוץ מחדש לשרשרת המשימות">
                     <div class="flex items-center justify-between">
-                        <span class="text-amber-900 font-extrabold text-xs flex items-center gap-1.5"><i class="fa-solid fa-clock text-amber-600"></i> זמני המשימה והשרשרת:</span>
-                        <span class="text-[10px] bg-amber-600 text-white font-black px-2 py-0.5 rounded-md">ערוך שרשרת</span>
+                        <span class="text-amber-900 font-extrabold text-xs flex items-center gap-1.5">
+                            <i class="fa-solid fa-clock text-amber-600"></i> זמני המשימה והשרשרת (לחץ לעריכה):
+                        </span>
+                        <span class="text-[10px] bg-amber-600 text-white font-black px-2 py-0.5 rounded-md group-hover:scale-105 transition-transform">שינוי שרשרת</span>
                     </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-slate-600 font-semibold">חלון זמן (24 שעות):</span>
-                        <span id="taskModalTimeSlot" class="font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-lg">16:00 - 17:30</span>
+                    <div class="flex items-center justify-between pt-1">
+                        <span class="text-slate-600 font-semibold">חלון זמן (24h):</span>
+                        <span id="taskModalTimeSlot" class="font-black text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded-lg">16:00 - 17:30</span>
                     </div>
                     <div class="flex items-center justify-between">
                         <span class="text-slate-600 font-semibold">תאריך:</span>
                         <span id="taskModalDateStr" class="font-bold text-slate-800">17/11/2026</span>
                     </div>
-                </div>
-
-                <!-- EDITABLE ALLOCATED MINUTES FIELD -->
-                <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 flex justify-between items-center">
-                    <span class="font-extrabold text-slate-800 text-xs flex items-center gap-1.5">
-                        <i class="fa-solid fa-stopwatch theme-text-primary text-sm"></i> הקצבת דקות למשימה:
-                    </span>
-                    <div class="flex items-center gap-1.5">
-                        <input type="number" id="taskModalAllocatedMins" min="5" value="30" onchange="updateActiveTaskAllocatedTime(this.value)" class="w-20 bg-white border border-slate-300 rounded-xl p-1.5 text-center font-bold text-xs">
-                        <span class="font-bold text-slate-600">דקות</span>
+                    <div class="text-[10px] text-amber-800 font-bold text-center pt-1 italic">
+                        * לחיצה כאן תפתח את מסך שיבוץ מחדש ותעדכן את כל שרשרת המשימות הבאות
                     </div>
                 </div>
 
-                <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-2">
+                <!-- EDITABLE ALLOCATED MINUTES & STEP NAME -->
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
                     <div class="flex items-center justify-between">
-                        <span class="text-slate-500 font-semibold">שלב / תיאור:</span>
+                        <span class="text-slate-600 font-semibold">שלב / תיאור:</span>
                         <span id="taskModalStepName" class="font-extrabold text-slate-900 text-xs">שם השלב</span>
+                    </div>
+                    <div class="flex items-center justify-between pt-2 border-t border-slate-200">
+                        <label class="text-slate-700 font-bold text-xs flex items-center gap-1.5">
+                            <i class="fa-solid fa-stopwatch text-amber-600"></i> הקצבת דקות לשלב זה:
+                        </label>
+                        <div class="flex items-center gap-1">
+                            <input type="number" id="taskModalAllocatedMinsInput" min="5" step="5" onchange="updateActiveStepAllocatedMins(this.value)" class="w-16 bg-white border border-slate-300 rounded-lg p-1.5 text-center font-black text-xs text-slate-900">
+                            <span class="font-bold text-slate-600 text-xs">דק'</span>
+                        </div>
                     </div>
                 </div>
 
                 <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-2.5">
                     <div class="flex justify-between items-center">
-                        <h4 class="text-xs font-black text-slate-800"><i class="fa-solid fa-bell text-amber-500"></i> התראות</h4>
-                        <button onclick="addReminderToActiveTask()" class="text-[11px] font-bold text-emerald-700 hover:underline"><i class="fa-solid fa-plus-circle"></i> הוסף התראה</button>
+                        <h4 class="text-xs font-black text-slate-800 flex items-center gap-1.5"><i class="fa-solid fa-bell text-amber-500"></i> התראות ותזכורות</h4>
+                        <button onclick="addReminderToActiveTask()" class="text-[11px] font-bold text-emerald-700 hover:underline flex items-center gap-1"><i class="fa-solid fa-plus-circle"></i> הוסף התראה</button>
                     </div>
-                    <div id="taskModalRemindersList" class="flex flex-wrap gap-2"></div>
+                    <div id="taskModalRemindersList" class="flex flex-wrap gap-2 pt-1"></div>
                 </div>
 
-                <div id="taskModalActionGrid" class="grid grid-cols-2 gap-2.5">
-                    <button onclick="toggleTaskStepCompleted()" id="taskModalCompleteBtn" class="py-2.5 px-3 bg-emerald-600 text-white rounded-xl font-bold transition flex items-center justify-center gap-1.5"><i class="fa-solid fa-check-circle"></i><span>סמן כבוצע</span></button>
-                    <button onclick="editTaskPrompt()" class="py-2.5 px-3 bg-slate-800 text-white rounded-xl font-bold flex items-center justify-center gap-1.5"><i class="fa-solid fa-pen"></i><span>ערוך מלל</span></button>
-                    <button onclick="deleteTaskGroup()" class="col-span-2 py-2.5 px-3 bg-red-50 text-red-600 border border-red-200 rounded-xl font-bold flex items-center justify-center gap-1.5"><i class="fa-solid fa-trash-can"></i><span>מחק מטלה זו</span></button>
+                <div id="taskModalActionGrid" class="grid grid-cols-2 gap-2.5 pt-1">
+                    <button onclick="toggleTaskStepCompleted()" id="taskModalCompleteBtn" class="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold flex items-center justify-center gap-1.5 shadow-xs transition">
+                        <i class="fa-solid fa-check-circle"></i><span>סמן כבוצע</span>
+                    </button>
+                    <button onclick="editTaskPrompt()" class="py-2.5 px-3 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold flex items-center justify-center gap-1.5 shadow-xs transition">
+                        <i class="fa-solid fa-pen"></i><span>ערוך מלל</span>
+                    </button>
+                    <button onclick="openChainRescheduleModalFromTask()" class="col-span-2 py-3 px-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-black flex items-center justify-center gap-2 shadow-xs transition">
+                        <i class="fa-solid fa-arrows-rotate"></i><span>הצעת שיבוץ וחלוקה ביומן (עדכון שרשרת)</span>
+                    </button>
+                    <button onclick="deleteTaskGroup()" class="col-span-2 py-2.5 px-3 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-xl font-bold flex items-center justify-center gap-1.5 transition">
+                        <i class="fa-solid fa-trash-can"></i><span>מחק מטלה זו לחלוטין</span>
+                    </button>
                 </div>
 
-                <!-- SUB-STEP REORDERING CONTROLS IN TASK DETAIL -->
-                <div id="taskModalStepsSection" class="pt-3 border-t border-slate-200 space-y-2">
-                    <h4 class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5"><i class="fa-solid fa-list-check theme-text-primary"></i> חלקים נוספים (לחץ למעבר):</h4>
+                <div id="taskModalStepsSection" class="pt-3 border-t border-slate-200">
+                    <div class="flex justify-between items-center mb-2.5">
+                        <h4 class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5"><i class="fa-solid fa-list-check theme-text-primary"></i> חלקים נוספים למשימה (ניתן לשנות סדר):</h4>
+                        <div class="flex gap-1">
+                            <button onclick="moveCurrentActiveTaskStepUp()" class="p-1 px-2 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-lg text-xs font-bold transition" title="הזז שלב פעיל קדימה בסדר"><i class="fa-solid fa-arrow-right"></i> קדימה</button>
+                            <button onclick="moveCurrentActiveTaskStepDown()" class="p-1 px-2 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-lg text-xs font-bold transition" title="הזז שלב פעיל אחורה בסדר"><i class="fa-solid fa-arrow-left"></i> אחורה</button>
+                        </div>
+                    </div>
                     <div id="taskModalStepsBubbles" class="flex gap-2 overflow-x-auto pb-2 no-scrollbar"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- CHAIN RESCHEDULE MODAL WITH REORDERING -->
+    <!-- CHAIN RESCHEDULE MODAL -->
     <div id="chainRescheduleModal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs hidden flex items-center justify-center p-3 sm:p-4">
         <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-pop border border-slate-100">
             <div class="bg-amber-500 text-white px-5 py-3.5 flex justify-between items-center shrink-0">
-                <div class="flex items-center gap-2.5"><i class="fa-solid fa-arrows-rotate text-lg"></i><h2 class="text-sm font-black">שינוי סדר וזמנים בשרשרת</h2></div>
-                <button onclick="closeChainRescheduleModal()" class="text-white hover:bg-black/10 rounded-full w-7 h-7 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-arrows-rotate text-lg"></i>
+                    <h2 class="text-sm font-black">הצעת שיבוץ, חלוקה וסדר ביומן - עדכון שרשרת</h2>
+                </div>
+                <button onclick="closeChainRescheduleModal()" class="text-white hover:bg-black/10 rounded-full w-7 h-7 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
             </div>
-            <div class="p-4 overflow-y-auto space-y-3 text-xs flex-1">
-                <div id="chainTimelineContainer" class="space-y-2.5 max-h-80 overflow-y-auto pr-1"></div>
+
+            <div class="p-4 sm:p-5 overflow-y-auto space-y-4 text-xs flex-1">
+                <p class="text-[11px] text-amber-900 bg-amber-50 p-2.5 rounded-xl border border-amber-200">
+                    <i class="fa-solid fa-circle-info text-amber-600"></i>
+                    ניתן לשנות תאריך, שעת התחלה, הקצבת דקות וכן לשנות את **סדר השלבים** באמצעות כפתורי החצים.
+                </p>
+                <div id="chainTimelineContainer" class="space-y-2.5 max-h-72 overflow-y-auto pr-1"></div>
             </div>
+
             <div class="bg-slate-100 px-4 py-3 border-t border-slate-200 flex justify-end gap-2 shrink-0">
-                <button onclick="closeChainRescheduleModal()" class="py-2.5 px-4 bg-slate-200 text-slate-700 rounded-xl font-bold text-xs">ביטול</button>
-                <button onclick="saveChainRescheduleChanges()" class="py-2.5 px-5 bg-amber-500 text-white rounded-xl font-black text-xs">אישור ושמירת שרשרת</button>
+                <button type="button" onclick="closeChainRescheduleModal()" class="py-2.5 px-4 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl font-bold text-xs transition">ביטול</button>
+                <button type="button" onclick="saveChainRescheduleChanges()" class="py-2.5 px-5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-black text-xs shadow-xs transition">אישור ושמירת שרשרת</button>
             </div>
         </div>
     </div>
 
-    <!-- ADD TASK MODAL WITH REORDERING & INTERLEAVED MEMORIZATION -->
+    <!-- ADD TASK & SMART SCHEDULER MODAL -->
     <div id="addTaskModal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs hidden flex items-center justify-center p-3 sm:p-4">
         <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-pop border border-slate-100">
             <div class="theme-bg-primary px-5 py-3.5 flex justify-between items-center text-slate-900 shrink-0">
-                <div class="flex items-center gap-2.5"><i class="fa-solid fa-layer-group text-lg"></i><h2 class="text-sm font-black">יצירת משימה / קורס במערכת</h2></div>
-                <button onclick="closeAddTaskModal()" class="text-slate-900 hover:bg-black/10 rounded-full w-7 h-7 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+                <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-layer-group text-lg"></i>
+                    <h2 class="text-sm font-black">יצירת משימה / קורס במערכת</h2>
+                </div>
+                <button onclick="closeAddTaskModal()" class="text-slate-900 hover:bg-black/10 rounded-full w-7 h-7 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
             </div>
 
             <div class="p-4 sm:p-5 overflow-y-auto space-y-4 text-xs flex-1">
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">סוג המשימה</label>
-                    <select id="taskTypeSelect" onchange="handleTaskTypeChange()" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-bold text-slate-800">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">סוג המשימה / הוספה</label>
+                    <select id="taskTypeSelect" onchange="handleTaskTypeChange()" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-bold text-slate-800 focus:ring-2 focus:outline-none">
                         <option value="hebrew_article">קריאת מאמר בעברית</option>
                         <option value="english_article">קריאת מאמר באנגלית</option>
-                        <option value="memorization">שינון מושגים</option>
+                        <option value="memorization">שינון מושגים (משולב ומרווח)</option>
                         <option value="lesson_summary">סיכום שיעור</option>
                         <option value="assignment">עבודת הגשה / מטלה</option>
                         <option value="exam_prep">לימוד למבחן סמסטר</option>
@@ -322,21 +492,25 @@
                 </div>
 
                 <div id="courseSelectWrapper">
-                    <label class="block text-xs font-bold text-slate-700 mb-1">שם הקורס השייך</label>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-xs font-bold text-slate-700">שם הקורס השייך</label>
+                    </div>
                     <div class="flex gap-2">
-                        <select id="taskCourseSelect" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-bold text-slate-800"></select>
-                        <button onclick="addNewCoursePrompt()" class="bg-slate-200 text-slate-800 px-3 rounded-xl text-xs font-bold shrink-0"><i class="fa-solid fa-plus"></i> חדש</button>
+                        <select id="taskCourseSelect" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-bold text-slate-800 focus:ring-2 focus:outline-none"></select>
+                        <button onclick="addNewCoursePrompt()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-3 rounded-xl text-xs font-bold transition shrink-0 flex items-center gap-1">
+                            <i class="fa-solid fa-plus"></i> חדש
+                        </button>
                     </div>
                 </div>
 
                 <div id="standardTaskFields" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">שם המשימה/העבודה</label>
-                        <input type="text" id="taskTitleInput" placeholder="למשל: שינון מושגים לבוחן" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-800 font-medium">
+                        <input type="text" id="taskTitleInput" placeholder="למשל: שינון מושגים לבוחן" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-800 font-medium focus:ring-2 focus:outline-none">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">תאריך יעד (סיום)</label>
-                        <input type="date" id="taskDueDateInput" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-800 font-medium">
+                        <input type="date" id="taskDueDateInput" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-slate-800 font-medium focus:ring-2 focus:outline-none">
                     </div>
                 </div>
 
@@ -359,20 +533,26 @@
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">שעת התחלה (24 שעות)</label>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">שעת התחלה (24h)</label>
                             <input type="time" id="manualCourseStartTime" value="08:30" class="w-full bg-white border border-slate-300 rounded-xl p-2.5 font-bold">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">שעת סיום</label>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">שעת סיום (24h)</label>
                             <input type="time" id="manualCourseEndTime" value="10:00" class="w-full bg-white border border-slate-300 rounded-xl p-2.5 font-bold">
                         </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">הערה במלל חופשי</label>
+                        <input type="text" id="manualCourseNoteInput" placeholder="הערות אישיות לשיעור..." class="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-slate-800 font-medium">
                     </div>
                 </div>
 
                 <div id="dynamicTaskFields" class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-2.5"></div>
 
                 <div id="customStepsArea" class="hidden">
-                    <button onclick="addCustomSubStep()" class="w-full py-2 bg-slate-100 text-slate-700 border border-dashed border-slate-300 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5"><i class="fa-solid fa-plus-circle theme-text-primary"></i> הוסף שלב במלל חופשי</button>
+                    <button onclick="addCustomSubStep()" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-dashed border-slate-300 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition">
+                        <i class="fa-solid fa-plus-circle theme-text-primary"></i> הוסף שלב במלל חופשי
+                    </button>
                 </div>
 
                 <div id="reminderConfigRow" class="bg-slate-50 p-3 rounded-2xl border border-slate-200 flex items-center justify-between">
@@ -389,17 +569,25 @@
 
                 <div id="scheduleProposalResult" class="hidden mt-4 pt-3 border-t border-slate-200">
                     <div class="flex items-center justify-between mb-1">
-                        <h3 class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5"><i class="fa-solid fa-wand-magic-sparkles text-amber-500 text-sm"></i> הצעת שיבוץ וחלוקה ביומן:</h3>
+                        <h3 class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-wand-magic-sparkles text-amber-500 text-sm"></i> הצעת שיבוץ וחלוקה ליומן:
+                        </h3>
+                    </div>
+                    <div id="scheduleWarningNotice" class="hidden text-[11px] font-bold text-amber-900 bg-amber-100 p-2 rounded-xl mb-2 border border-amber-300">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-600"></i>
+                        <span id="scheduleWarningText">תקופת הלימוד קצרה מתכנון רגיל - הלו"ז קובץ בצורה צפופה יותר</span>
                     </div>
                     <div id="proposalTimeline" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
                 </div>
             </div>
 
             <div class="bg-slate-100 px-4 py-3 border-t border-slate-200 flex flex-col gap-2 shrink-0">
-                <button id="proposalBtn" type="button" onclick="generateSmartScheduleProposal()" class="w-full py-3 theme-bg-primary text-slate-900 rounded-xl font-black text-xs shadow-xs"><i class="fa-solid fa-microchip"></i> הצעת שיבוץ וחלוקה</button>
+                <button id="proposalBtn" type="button" onclick="generateSmartScheduleProposal()" class="w-full py-3 theme-bg-primary text-slate-900 rounded-xl font-black shadow-xs transition flex items-center justify-center gap-2 text-xs">
+                    <i class="fa-solid fa-microchip"></i> הצעת שיבוץ וחלוקה
+                </button>
                 <div class="flex gap-2">
-                    <button type="button" onclick="saveTaskAndSchedule()" class="flex-1 py-2.5 bg-slate-900 text-white rounded-xl font-bold text-xs shadow-xs">שמור והוסף ללוח שנה</button>
-                    <button type="button" onclick="closeAddTaskModal()" class="py-2.5 px-4 bg-slate-200 text-slate-700 rounded-xl font-bold text-xs">ביטול</button>
+                    <button type="button" onclick="saveTaskAndSchedule()" class="flex-1 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs shadow-xs transition">שמור והוסף ללוח שנה</button>
+                    <button type="button" onclick="closeAddTaskModal()" class="py-2.5 px-4 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl font-bold text-xs transition">ביטול</button>
                 </div>
             </div>
         </div>
@@ -413,14 +601,18 @@
                     <i class="fa-solid fa-file-excel theme-text-primary text-lg"></i>
                     <h2 class="text-sm font-black">ייבוא אירועים ומערכת שעות מאקסל</h2>
                 </div>
-                <button onclick="closeExcelImportModal()" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <button onclick="closeExcelImportModal()" class="text-slate-400 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
             </div>
+
             <div class="p-4 sm:p-5 overflow-y-auto space-y-4 text-xs flex-1">
                 <div class="border-2 border-dashed border-slate-300 rounded-2xl p-6 text-center bg-slate-50 hover:bg-slate-100 transition cursor-pointer" onclick="document.getElementById('excelFileInput').click()">
                     <i class="fa-solid fa-cloud-arrow-up text-3xl theme-text-primary mb-2"></i>
                     <p class="font-bold text-slate-800">לחץ לבחירת קובץ אקסל (.xlsx, .xls, .csv)</p>
                     <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleExcelFileUpload(event)">
                 </div>
+
                 <div id="excelPreviewArea" class="hidden space-y-3 pt-2">
                     <div class="flex justify-between items-center flex-wrap gap-1">
                         <h3 class="font-black text-slate-800 text-xs" id="excelSummaryTitle">תוצאות טעינת קובץ:</h3>
@@ -432,6 +624,7 @@
                     <div id="excelPreviewList" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
                 </div>
             </div>
+
             <div class="bg-slate-100 px-4 py-3 border-t border-slate-200 flex justify-end gap-2 shrink-0">
                 <button onclick="closeExcelImportModal()" class="py-2.5 px-4 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl font-bold text-xs transition">ביטול</button>
                 <button onclick="confirmExcelImport()" id="confirmImportBtn" class="py-2.5 px-5 theme-bg-primary text-slate-900 rounded-xl font-black text-xs shadow-xs transition hidden">אשר ועדכן ביומן</button>
@@ -465,11 +658,12 @@
         <span id="toastMessage">פעולה בוצעה בהצלחה</span>
     </div>
 
-    <!-- MAIN SCRIPT MODULE -->
+    <!-- FIREBASE & MAIN SCRIPT -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+        // FIREBASE CONFIGURATION
         const firebaseConfig = {
             apiKey: "AIzaSyBfmBVq0xbChK7f9hNT91RGGiuSGz6-oAw",
             authDomain: "roni-student-planner.firebaseapp.com",
@@ -484,6 +678,7 @@
         const db = getFirestore(app);
         const userDocRef = doc(db, "users_data", "main_planner_store");
 
+        // --- COURSE COLOR PALETTE ---
         const COURSE_COLORS = {
             "ביולוגיה של התא": "#1d4ed8",
             "ניתוח מאמר מדעי וחיפוש במאגרי מידע": "#059669",
@@ -503,6 +698,7 @@
             "כללי": "#64748b"
         };
 
+        // --- GLOBAL APP STATE ---
         window.state = {
             currentDate: new Date(),
             selectedDate: new Date(),
@@ -523,7 +719,15 @@
             ],
             events: [],
             taskGroups: [],
-            blockedTimes: { 0:[], 1:[], 2:[], 3:[], 4:[], 5:[], 6:[] },
+            blockedTimes: {
+                0: [{ start: "18:00", end: "21:00" }],
+                1: [{ start: "18:00", end: "21:00" }],
+                2: [{ start: "18:00", end: "21:00" }],
+                3: [{ start: "18:00", end: "21:00" }],
+                4: [{ start: "18:00", end: "21:00" }],
+                5: [],
+                6: []
+            },
             activeModalTask: null,
             activeModalStepIdx: 0,
             activeCourseEvent: null,
@@ -534,9 +738,11 @@
             excelUpdatedEvents: []
         };
 
+        // --- DYNAMIC THEME SYSTEM ---
         window.applyCustomThemeColor = function(colorHex) {
             if (!colorHex) return;
             state.themeColor = colorHex;
+            
             const darkHex = adjustColorBrightness(colorHex, -20);
             const lightHex = adjustColorBrightness(colorHex, 35);
 
@@ -550,8 +756,12 @@
             const pickerInput = document.getElementById('themeColorInput');
             if (pickerInput) pickerInput.value = colorHex;
 
-            try { localStorage.setItem('student_planner_theme_v7', colorHex); } catch(e){}
+            try {
+                localStorage.setItem('student_planner_theme_v8', colorHex);
+            } catch(e){}
+
             renderApp();
+            showToast('ערכת הנושא והצבע עודכנו בהצלחה!');
         };
 
         function adjustColorBrightness(hex, percent) {
@@ -563,35 +773,41 @@
             return "#" + (0x1000000 + (R<255?R<1?0:R:255)*0x10000 + (B<255?B<1?0:B:255)*0x100 + (G<255?G<1?0:G:255)).toString(16).slice(1);
         }
 
+        // --- SANITIZE & PROTECT STATE DATA ---
         function sanitizeStateData() {
             if (!Array.isArray(state.events)) state.events = [];
             if (!Array.isArray(state.taskGroups)) state.taskGroups = [];
             if (!Array.isArray(state.courses)) state.courses = [];
 
             state.taskGroups.forEach(group => {
-                if (!group.steps || !Array.isArray(group.steps)) group.steps = [];
+                if (!group.steps || !Array.isArray(group.steps)) {
+                    group.steps = [];
+                }
             });
         }
 
+        // --- FIREBASE REALTIME SYNC & LOCAL PERSISTENCE ---
         function initFirebaseRealtimeSync() {
             try {
-                const savedGroups = localStorage.getItem('student_planner_groups_v7');
+                const savedGroups = localStorage.getItem('student_planner_groups_v8') || localStorage.getItem('student_planner_groups_v7');
                 if (savedGroups) state.taskGroups = JSON.parse(savedGroups);
 
-                const savedCourses = localStorage.getItem('student_planner_courses_v7');
+                const savedCourses = localStorage.getItem('student_planner_courses_v8') || localStorage.getItem('student_planner_courses_v7');
                 if (savedCourses) state.courses = JSON.parse(savedCourses);
 
-                const savedEvents = localStorage.getItem('student_planner_events_v7');
+                const savedEvents = localStorage.getItem('student_planner_events_v8') || localStorage.getItem('student_planner_events_v7');
                 if (savedEvents) state.events = JSON.parse(savedEvents);
 
-                const savedBlocked = localStorage.getItem('student_planner_blocked_v7');
+                const savedBlocked = localStorage.getItem('student_planner_blocked_v8') || localStorage.getItem('student_planner_blocked_v7');
                 if (savedBlocked) state.blockedTimes = JSON.parse(savedBlocked);
 
-                const savedTheme = localStorage.getItem('student_planner_theme_v7');
+                const savedTheme = localStorage.getItem('student_planner_theme_v8') || localStorage.getItem('student_planner_theme_v7');
                 if (savedTheme) applyCustomThemeColor(savedTheme);
 
                 sanitizeStateData();
-            } catch (e) { console.error("Local storage error:", e); }
+            } catch (e) {
+                console.error("Local storage error:", e);
+            }
 
             onSnapshot(userDocRef, (docSnap) => {
                 if (docSnap.exists()) {
@@ -603,24 +819,30 @@
                     if (data.themeColor) applyCustomThemeColor(data.themeColor);
                     
                     sanitizeStateData();
-                    localStorage.setItem('student_planner_groups_v7', JSON.stringify(state.taskGroups));
-                    localStorage.setItem('student_planner_courses_v7', JSON.stringify(state.courses));
-                    localStorage.setItem('student_planner_events_v7', JSON.stringify(state.events));
-                    localStorage.setItem('student_planner_blocked_v7', JSON.stringify(state.blockedTimes));
+                    
+                    localStorage.setItem('student_planner_groups_v8', JSON.stringify(state.taskGroups));
+                    localStorage.setItem('student_planner_courses_v8', JSON.stringify(state.courses));
+                    localStorage.setItem('student_planner_events_v8', JSON.stringify(state.events));
+                    localStorage.setItem('student_planner_blocked_v8', JSON.stringify(state.blockedTimes));
+                    
                     renderApp();
                 }
-            }, (error) => { console.warn("Firestore offline mode or restriction:", error); });
+            }, (error) => {
+                console.warn("Firestore offline mode or rule restriction:", error);
+            });
         }
 
         window.saveData = async function() {
             sanitizeStateData();
             try {
-                localStorage.setItem('student_planner_groups_v7', JSON.stringify(state.taskGroups));
-                localStorage.setItem('student_planner_courses_v7', JSON.stringify(state.courses));
-                localStorage.setItem('student_planner_events_v7', JSON.stringify(state.events));
-                localStorage.setItem('student_planner_blocked_v7', JSON.stringify(state.blockedTimes));
-                localStorage.setItem('student_planner_theme_v7', state.themeColor);
-            } catch (e) { console.error("Local storage write error:", e); }
+                localStorage.setItem('student_planner_groups_v8', JSON.stringify(state.taskGroups));
+                localStorage.setItem('student_planner_courses_v8', JSON.stringify(state.courses));
+                localStorage.setItem('student_planner_events_v8', JSON.stringify(state.events));
+                localStorage.setItem('student_planner_blocked_v8', JSON.stringify(state.blockedTimes));
+                localStorage.setItem('student_planner_theme_v8', state.themeColor);
+            } catch (e) {
+                console.error("Local storage write error:", e);
+            }
 
             try {
                 await setDoc(userDocRef, {
@@ -631,35 +853,51 @@
                     themeColor: state.themeColor,
                     updatedAt: new Date().toISOString()
                 }, { merge: true });
-            } catch (err) { console.error("Error saving to Firebase:", err); }
+            } catch (err) {
+                console.error("Error saving to Firebase:", err);
+            }
         };
 
+        // --- LOCATION PARSER & LINK RENDERER ---
         function parseLocationFromExcelRow(row) {
             const rawExplicit = (row['מיקום'] || row['חדר'] || row['Location'] || '').toString().trim();
             const contentText = (row['תוכן'] || row['Content'] || row['תיאור'] || row['Description'] || row['מידע נוסף'] || '').toString().trim();
             const fullCombined = `${rawExplicit} ${contentText} ${Object.values(row).join(' ')}`.trim();
-            if (/זום|zoom/i.test(fullCombined)) return 'שיעור בזום';
+
+            if (/זום|zoom/i.test(fullCombined)) {
+                return 'שיעור בזום';
+            }
+
             const hlMatch = fullCombined.match(/חדר\s*לימוד\s*:\s*(.*?)(?=\s*קמפוס|\s*\(מתקיים\)|\s*קורס|\s*השיעור|\s*רשום|$)/i);
             if (hlMatch && hlMatch[1]) {
                 let parsedVal = hlMatch[1].replace(/-\s*חדש/g, '').replace(/\.$/, '').trim();
                 if (parsedVal) return parsedVal;
             }
+
             const roomMatch = fullCombined.match(/(חדר(?:\s+הרצאות)?(?:\s*[-–]\s*|\s+)\d+[^\s,]*|תא\s*שמע\s*[-–]?\s*\d+|מעבדה\s*\d+|אודיטוריום\s*\d+|כיתת\s*אנטומיה)/i);
             const bldMatch = fullCombined.match(/(בניין\s*[A-Za-z0-9א-ת]+)/i);
+
             const parts = [];
             if (roomMatch) parts.push(roomMatch[1].trim());
             if (bldMatch) parts.push(bldMatch[1].trim());
+
             if (parts.length > 0) return parts.join(' ');
             if (rawExplicit && rawExplicit !== 'קמפוס') return rawExplicit;
+
             return 'קמפוס';
         }
 
         function cleanCourseName(rawTitle) {
             if (!rawTitle) return 'כללי';
-            let title = String(rawTitle).trim().replace(/\*\*\s*השיעור מבוטל\s*\*\*/g, '').replace(/השיעור בוטל\./g, '').trim();
+            let title = String(rawTitle).trim();
+            
+            title = title.replace(/\*\*\s*השיעור מבוטל\s*\*\*/g, '').replace(/השיעור בוטל\./g, '').trim();
             title = title.replace(/(ד"ר|גב'|מר|פרופ'|פרופסור)\s+[\u0590-\u05FF\s]+/g, '').trim();
+
             for (let courseObj of state.courses) {
-                if (courseObj.name !== 'כללי' && title.includes(courseObj.name)) return courseObj.name;
+                if (courseObj.name !== 'כללי' && title.includes(courseObj.name)) {
+                    return courseObj.name;
+                }
             }
             return title || 'כללי';
         }
@@ -667,28 +905,61 @@
         function renderLocationHtml(location) {
             if (!location) return '<span class="text-slate-500">קמפוס</span>';
             const locStr = String(location).trim();
+
             if (/זום|zoom/i.test(locStr) || locStr === 'שיעור בזום') {
-                return `<span class="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded-md border border-blue-200 text-[11px]"><i class="fa-solid fa-video text-blue-500 text-xs"></i><span>שיעור בזום</span></span>`;
+                return `
+                    <span class="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded-md border border-blue-200 text-[11px]">
+                        <i class="fa-solid fa-video text-blue-500 text-xs"></i>
+                        <span>שיעור בזום</span>
+                    </span>
+                `;
             }
-            return `<a href="https://navi.ono.ac.il/" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();" class="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-900 font-bold hover:underline transition group"><i class="fa-solid fa-diamond-turn-right text-emerald-600"></i><span>${locStr}</span><i class="fa-solid fa-arrow-up-right-from-square text-[9px] opacity-70"></i></a>`;
+
+            return `
+                <a href="https://navi.ono.ac.il/" target="_blank" rel="noopener noreferrer" 
+                   onclick="event.stopPropagation();" 
+                   class="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-900 font-bold hover:underline transition group"
+                   title="לחץ לפתיחת מפת ניווט בקמפוס (navi.ono.ac.il)">
+                    <i class="fa-solid fa-diamond-turn-right text-emerald-600 group-hover:scale-110 transition-transform"></i>
+                    <span>${locStr}</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[9px] opacity-70"></i>
+                </a>
+            `;
         }
 
+        // --- PWA SETUP ---
         (function setupPWA() {
             const manifestData = {
-                name: "רוני סטודנט פלאנר", short_name: "פלאנר", description: "אפליקציית ניהול עומסי לימודים, מערכת שעות ומשימות לסטודנטים", start_url: "./", display: "standalone", background_color: "#ffffff", theme_color: "#a8d100",
-                icons: [{ src: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><path fill='%23a8d100' d='M0 0h512v512H0z'/><path fill='%230f172a' d='M256 120L32 216l224 96 176-75.4V360h32V216L256 120z'/></svg>", sizes: "512x512", type: "image/svg+xml" }]
+                name: "רוני סטודנט פלאנר",
+                short_name: "פלאנר",
+                description: "אפליקציית ניהול עומסי לימודים, מערכת שעות ומשימות לסטודנטים",
+                start_url: "./",
+                display: "standalone",
+                background_color: "#ffffff",
+                theme_color: "#a8d100",
+                icons: [{
+                    src: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><path fill='%23a8d100' d='M0 0h512v512H0z'/><path fill='%230f172a' d='M256 120L32 216l224 96 176-75.4V360h32V216L256 120z'/></svg>",
+                    sizes: "512x512",
+                    type: "image/svg+xml"
+                }]
             };
             const blob = new Blob([JSON.stringify(manifestData)], { type: 'application/json' });
             document.querySelector('#manifestLink').setAttribute('href', URL.createObjectURL(blob));
+
             if ('serviceWorker' in navigator) {
-                const swCode = `self.addEventListener('install', e => self.skipWaiting()); self.addEventListener('activate', e => e.waitUntil(self.clients.claim())); self.addEventListener('fetch', e => {});`;
+                const swCode = `
+                    self.addEventListener('install', (e) => self.skipWaiting());
+                    self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
+                    self.addEventListener('fetch', (e) => {});
+                `;
                 navigator.serviceWorker.register(URL.createObjectURL(new Blob([swCode], { type: 'text/javascript' }))).catch(() => {});
             }
         })();
 
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault(); deferredPrompt = e;
+            e.preventDefault();
+            deferredPrompt = e;
             const installBtn = document.getElementById('pwaInstallBtn');
             if (installBtn) installBtn.classList.remove('hidden');
         });
@@ -704,9 +975,11 @@
             }
         };
 
+        // --- APP INITIALIZATION ---
         window.onload = function() {
             initFirebaseRealtimeSync();
             checkAndSyncNotificationButtonUI();
+
             const todayStr = formatDateISO(new Date());
             const dueDateInput = document.getElementById('taskDueDateInput');
             if (dueDateInput) dueDateInput.min = todayStr;
@@ -715,6 +988,7 @@
             if (dueDateInput) dueDateInput.value = formatDateISO(defaultDueDate);
             const manualDateInput = document.getElementById('manualCourseDateInput');
             if (manualDateInput) manualDateInput.value = formatDateISO(state.selectedDate);
+
             populateFilteredCourseSelect();
             handleTaskTypeChange();
             renderApp();
@@ -725,12 +999,18 @@
                 renderHeaderTitle();
                 renderCalendar();
                 renderSelectedDaySchedule();
-            } catch (err) { console.error("Error rendering app:", err); }
+            } catch (err) {
+                console.error("Error rendering app:", err);
+            }
         };
 
+        // --- CALENDAR NAVIGATION ---
         window.navigateDate = function(direction) {
-            if (state.viewMode === 'month') { state.currentDate.setMonth(state.currentDate.getMonth() + direction); }
-            else { state.currentDate.setDate(state.currentDate.getDate() + (direction * 7)); }
+            if (state.viewMode === 'month') {
+                state.currentDate.setMonth(state.currentDate.getMonth() + direction);
+            } else {
+                state.currentDate.setDate(state.currentDate.getDate() + (direction * 7));
+            }
             renderApp();
         };
 
@@ -738,6 +1018,7 @@
             state.viewMode = state.viewMode === 'month' ? 'week' : 'month';
             const icon = document.getElementById('viewToggleIcon');
             const label = document.getElementById('viewToggleLabel');
+            
             if (state.viewMode === 'month') {
                 if (icon) icon.className = 'fa-solid fa-calendar-week text-sm';
                 if (label) label.textContent = 'שבועי';
@@ -780,10 +1061,13 @@
             const monthsShortHe = ['ינו\'', 'פבר\'', 'מרץ', 'אפר\'', 'מאי', 'יוני', 'יולי', 'אוג\'', 'ספט\'', 'אוק\'', 'נוב\'', 'דצמ\''];
             const titleEl = document.getElementById('calendarTitle');
             if (!titleEl) return;
+
             const monthName = monthsShortHe[state.currentDate.getMonth()];
             const year = state.currentDate.getFullYear();
-            if (state.viewMode === 'month') { titleEl.textContent = `${monthName} ${year}`; }
-            else {
+
+            if (state.viewMode === 'month') {
+                titleEl.textContent = `${monthName} ${year}`;
+            } else {
                 const startOfWeek = getStartOfWeek(state.currentDate);
                 const endOfWeek = new Date(startOfWeek);
                 endOfWeek.setDate(endOfWeek.getDate() + 6);
@@ -791,19 +1075,26 @@
             }
         }
 
+        // --- CALENDAR GRID RENDERERS ---
         function renderCalendar() {
             const gridContainer = document.getElementById('calendarGrid');
             if (!gridContainer) return;
             gridContainer.innerHTML = '';
             try {
-                if (state.viewMode === 'month') renderMonthGrid(gridContainer);
-                else renderWeekGrid(gridContainer);
-            } catch (err) { console.error("Error rendering grid:", err); }
+                if (state.viewMode === 'month') {
+                    renderMonthGrid(gridContainer);
+                } else {
+                    renderWeekGrid(gridContainer);
+                }
+            } catch (err) {
+                console.error("Error rendering calendar grid:", err);
+            }
         }
 
         function renderMonthGrid(container) {
             const year = state.currentDate.getFullYear();
             const month = state.currentDate.getMonth();
+
             const firstDayOfMonth = new Date(year, month, 1);
             const daysInMonth = new Date(year, month + 1, 0).getDate();
             const startDayIndex = firstDayOfMonth.getDay();
@@ -852,6 +1143,7 @@
         function createDayCell(dayNumber, isOtherMonth, isSelected, dateObj) {
             const cell = document.createElement('div');
             cell.className = `day-cell flex flex-col items-center justify-start py-1 rounded-xl cursor-pointer transition hover:bg-slate-100 ${isOtherMonth ? 'opacity-30' : ''}`;
+            
             cell.onclick = () => {
                 state.selectedDate = new Date(dateObj);
                 populateFilteredCourseSelect();
@@ -860,7 +1152,11 @@
 
             const numSpan = document.createElement('span');
             numSpan.className = `w-6 h-6 flex items-center justify-center rounded-full font-bold text-xs transition ${
-                isSelected ? 'theme-bg-primary text-slate-900 shadow-xs scale-105 ring-2 ring-slate-900' : isToday(dateObj) ? 'border-2 theme-border-primary text-slate-900' : 'text-slate-800'
+                isSelected 
+                    ? 'theme-bg-primary text-slate-900 shadow-xs scale-105 ring-2 ring-slate-900' 
+                    : isToday(dateObj) 
+                        ? 'border-2 theme-border-primary text-slate-900' 
+                        : 'text-slate-800'
             }`;
             numSpan.textContent = dayNumber;
             cell.appendChild(numSpan);
@@ -892,6 +1188,7 @@
             return cell;
         }
 
+        // --- SCHEDULE LIST RENDERER ---
         function renderSelectedDaySchedule() {
             const container = document.getElementById('scheduleList');
             if (!container) return;
@@ -918,9 +1215,13 @@
                         <i class="fa-solid fa-calendar-xmark text-4xl text-slate-300"></i>
                         <span class="text-xs font-semibold">אין שיעורים, בחינות או משימות ליום זה</span>
                         <div class="flex gap-2 mt-2">
-                            <button onclick="openAddTaskModal()" class="text-xs theme-text-primary font-bold hover:underline flex items-center gap-1"><i class="fa-solid fa-plus-circle"></i> הוסף משימה / קורס</button>
+                            <button onclick="openAddTaskModal()" class="text-xs theme-text-primary font-bold hover:underline flex items-center gap-1">
+                                <i class="fa-solid fa-plus-circle"></i> הוסף משימה / קורס
+                            </button>
                             <span class="text-slate-300">|</span>
-                            <button onclick="openExcelImportModal()" class="text-xs text-slate-600 font-bold hover:underline flex items-center gap-1"><i class="fa-solid fa-file-excel text-emerald-600"></i> ייבא קובץ אקסל</button>
+                            <button onclick="openExcelImportModal()" class="text-xs text-slate-600 font-bold hover:underline flex items-center gap-1">
+                                <i class="fa-solid fa-file-excel text-emerald-600"></i> ייבא קובץ אקסל
+                            </button>
                         </div>
                     </div>
                 `;
@@ -943,6 +1244,7 @@
                     if (isCanceled) cardClasses += 'canceled-course-card ';
                     else if (isManual) cardClasses += 'manual-course-card ';
                     card.className = cardClasses;
+                    
                     if (!isCanceled && !isManual) card.style.borderRight = `6px solid ${isExam ? '#f59e0b' : isHoliday ? '#9333ea' : courseColor}`;
 
                     card.onclick = () => openCourseDetailModal(evt);
@@ -957,7 +1259,10 @@
                                 ${isHoliday ? '<span class="bg-purple-100 text-purple-800 text-[10px] font-black px-2 py-0.5 rounded-md">מועד מיוחד</span>' : ''}
                                 <span class="font-bold text-slate-800 text-xs sm:text-sm leading-tight ${isCanceled ? 'line-through text-red-800' : ''}">${evt.title}</span>
                             </div>
-                            <div class="text-xs text-slate-600 flex items-center gap-1.5 mb-1 font-medium">${renderLocationHtml(evt.location)}</div>
+                            <div class="text-xs text-slate-600 flex items-center gap-1.5 mb-1 font-medium">
+                                ${renderLocationHtml(evt.location)}
+                            </div>
+                            ${evt.notes ? `<div class="text-[11px] text-amber-900 font-medium italic mb-1">הערה: ${evt.notes}</div>` : ''}
                             <div class="text-[11px] text-slate-500 font-semibold mb-1">קורס: ${evt.course}</div>
                             <div class="flex flex-wrap gap-1 mt-1">${remLabel}</div>
                         </div>
@@ -1002,13 +1307,16 @@
                             <div class="font-extrabold text-slate-900 text-xs sm:text-sm leading-tight mb-0.5">${group.title}</div>
                             <div class="text-xs text-slate-600 font-semibold mb-1">שלב: ${step.stepName}</div>
                             <div class="text-[11px] text-slate-400 font-medium flex items-center gap-1 mb-1">
-                                <i class="fa-solid fa-graduation-cap"></i><span>${group.courseName}</span>
+                                <i class="fa-solid fa-graduation-cap"></i>
+                                <span>${group.courseName}</span>
                             </div>
                             <div class="flex flex-wrap gap-1">${remLabel}</div>
                         </div>
                         <div class="text-left pl-2 flex flex-col justify-between items-end border-r border-slate-100 pr-3 shrink-0">
-                            <div class="font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md text-[11px]">${step.startTime || '16:00'} - ${step.endTime || '17:00'}</div>
-                            <div class="text-[10px] text-slate-400 font-bold mt-1">${step.allocatedTime} דק'</div>
+                            <div class="font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md text-[11px]">
+                                ${step.startTime || '16:00'} - ${step.endTime || '17:00'}
+                            </div>
+                            <div class="text-[10px] text-slate-400 font-bold mt-1">${step.allocatedTime || 30} דק'</div>
                         </div>
                     `;
                     tasksSection.appendChild(card);
@@ -1017,6 +1325,7 @@
             }
         }
 
+        // --- BLOCKED TIMES MODAL ---
         window.openBlockedTimesModal = function() {
             renderBlockedTimesModalDays();
             const pickerInput = document.getElementById('themeColorInput');
@@ -1037,6 +1346,7 @@
             for (let dayIdx = 0; dayIdx < 7; dayIdx++) {
                 const dayCard = document.createElement('div');
                 dayCard.className = 'bg-white p-3 rounded-2xl border border-slate-200 shadow-xs space-y-2';
+
                 const slots = state.blockedTimes[dayIdx] || [];
 
                 let slotsHtml = slots.map((s, slotIdx) => `
@@ -1045,16 +1355,22 @@
                         <input type="time" value="${s.start}" onchange="state.blockedTimes[${dayIdx}][${slotIdx}].start = this.value" class="bg-white border border-slate-300 rounded-lg p-1 font-bold text-xs">
                         <span class="text-[11px] font-bold text-slate-600">עד-</span>
                         <input type="time" value="${s.end}" onchange="state.blockedTimes[${dayIdx}][${slotIdx}].end = this.value" class="bg-white border border-slate-300 rounded-lg p-1 font-bold text-xs">
-                        <button onclick="removeBlockedSlot(${dayIdx}, ${slotIdx})" class="text-red-500 hover:text-red-700 p-1 transition ml-auto"><i class="fa-solid fa-xmark"></i></button>
+                        <button onclick="removeBlockedSlot(${dayIdx}, ${slotIdx})" class="text-red-500 hover:text-red-700 p-1 transition ml-auto">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
                     </div>
                 `).join('');
 
                 dayCard.innerHTML = `
                     <div class="flex justify-between items-center">
                         <span class="font-extrabold text-slate-800 text-xs">${daysHe[dayIdx]}</span>
-                        <button onclick="addBlockedSlotRow(${dayIdx})" class="theme-text-primary hover:underline font-black text-xs bg-slate-900 hover:bg-slate-800 text-white px-2 py-1 rounded-lg transition flex items-center gap-1"><i class="fa-solid fa-plus text-[10px]"></i> הוסף חלון</button>
+                        <button onclick="addBlockedSlotRow(${dayIdx})" class="theme-text-primary hover:underline font-black text-xs bg-slate-900 hover:bg-slate-800 text-white px-2 py-1 rounded-lg transition flex items-center gap-1">
+                            <i class="fa-solid fa-plus text-[10px]"></i> הוסף חלון
+                        </button>
                     </div>
-                    <div class="space-y-1.5">${slotsHtml || '<p class="text-[10px] text-slate-400 italic">אין שעות חסומות ביום זה</p>'}</div>
+                    <div class="space-y-1.5">
+                        ${slotsHtml || '<p class="text-[10px] text-slate-400 italic">אין שעות חסומות ביום זה</p>'}
+                    </div>
                 `;
                 container.appendChild(dayCard);
             }
@@ -1077,6 +1393,7 @@
             showToast('הגדרות הזמנים והעיצוב נשמרו!');
         };
 
+        // --- COMPREHENSIVE COLLISION DETECTION SYSTEM ---
         function timeToMins(timeStr) {
             if (!timeStr) return 0;
             const [h, m] = timeStr.split(':').map(Number);
@@ -1088,6 +1405,7 @@
             const slotStartMins = (startH * 60) + startM;
             const slotEndMins = slotStartMins + durationMins;
 
+            // 1. Check Family/Blocked Times
             const dayOfWeek = dateObj.getDay();
             const blockedSlots = state.blockedTimes[dayOfWeek] || [];
             for (let s of blockedSlots) {
@@ -1096,6 +1414,7 @@
                 if (slotStartMins < bEndMins && slotEndMins > bStartMins) return true;
             }
 
+            // 2. Check Existing Courses & Calendar Events
             const dayEvents = (state.events || []).filter(e => e.date === dateISO && !e.isCanceled);
             for (let evt of dayEvents) {
                 const eStartMins = timeToMins(evt.startTime);
@@ -1103,6 +1422,7 @@
                 if (slotStartMins < eEndMins && slotEndMins > eStartMins) return true;
             }
 
+            // 3. Check Existing Scheduled Task Steps
             for (let group of (state.taskGroups || [])) {
                 for (let step of (group.steps || [])) {
                     if (excludeStepId && (step.id === excludeStepId || group.id === excludeStepId)) continue;
@@ -1113,13 +1433,13 @@
                     }
                 }
             }
+
             return false;
         }
 
-        // --- SOLVER FOR 24-HOUR AFTERNOON/EVENING STUDY SLOTS ---
         function findNextFreeSlot(dateObj, startH, startM, durationMins, existingProposalItems = []) {
             let currDate = new Date(dateObj);
-            let curH = startH >= 16 ? startH : 16;
+            let curH = startH;
             let curM = startM;
             let attempts = 0;
 
@@ -1136,7 +1456,8 @@
                             const pStart = timeToMins(p.startTime);
                             const pEnd = timeToMins(p.endTime);
                             if (slotStart < pEnd && slotEnd > pStart) {
-                                collision = true; break;
+                                collision = true;
+                                break;
                             }
                         }
                     }
@@ -1153,11 +1474,17 @@
                 }
 
                 curM += 15;
-                if (curM >= 60) { curM = 0; curH += 1; }
+                if (curM >= 60) {
+                    curM = 0;
+                    curH += 1;
+                }
+
                 if (curH >= 22) {
-                    curH = 16; curM = 0;
+                    curH = 10;
+                    curM = 0;
                     currDate.setDate(currDate.getDate() + 1);
                 }
+
                 attempts++;
             }
 
@@ -1174,6 +1501,7 @@
             const select = document.getElementById('taskCourseSelect');
             if (!select) return;
             select.innerHTML = '';
+
             const selectedISO = formatDateISO(state.selectedDate);
             const activeCourseNames = new Set();
             (state.events || []).forEach(evt => {
@@ -1191,6 +1519,7 @@
             });
         }
 
+        // --- COURSE DETAILS & EDIT ---
         window.openCourseDetailModal = function(evt) {
             state.activeCourseEvent = evt;
             const courseColor = COURSE_COLORS[evt.course] || '#dc2626';
@@ -1205,8 +1534,11 @@
             document.getElementById('courseLocationInput').value = evt.location || '';
 
             const naviLink = document.getElementById('courseModalNaviLink');
-            if (/זום|zoom/i.test(evt.location)) { naviLink.classList.add('hidden'); }
-            else { naviLink.classList.remove('hidden'); }
+            if (/זום|zoom/i.test(evt.location)) {
+                naviLink.classList.add('hidden');
+            } else {
+                naviLink.classList.remove('hidden');
+            }
 
             renderCourseReminders(evt.reminders || []);
             document.getElementById('courseDetailModal').classList.remove('hidden');
@@ -1238,6 +1570,7 @@
             if (!state.activeCourseEvent) return;
             const newLoc = document.getElementById('courseLocationInput').value.trim();
             state.activeCourseEvent.location = newLoc || 'מיקום עודכן';
+            
             saveData();
             closeCourseDetailModal();
             renderSelectedDaySchedule();
@@ -1258,40 +1591,6 @@
             `).join('');
         }
 
-        window.updateActiveTaskAllocatedTime = function(newMinsStr) {
-            if (!state.activeModalTask || state.activeModalStepIdx < 0) return;
-            const newMins = parseInt(newMinsStr) || 30;
-            const step = state.activeModalTask.steps[state.activeModalStepIdx];
-            step.allocatedTime = newMins;
-
-            const [sH, sM] = (step.startTime || '16:00').split(':').map(Number);
-            const totalEndMins = (sH * 60) + sM + newMins;
-            const eH = Math.floor(totalEndMins / 60);
-            const eM = totalEndMins % 60;
-            step.endTime = `${String(eH).padStart(2, '0')}:${String(eM).padStart(2, '0')}`;
-
-            saveData();
-            openTaskDetailModal(state.activeModalTask, state.activeModalStepIdx);
-            renderSelectedDaySchedule();
-            showToast('הקצבת הדקות ושעת הסיום עודכנו בהצלחה!');
-        };
-
-        window.moveSubStepInTaskDetail = function(stepIdx, direction) {
-            if (!state.activeModalTask) return;
-            const steps = state.activeModalTask.steps;
-            const targetIdx = stepIdx + direction;
-            if (targetIdx < 0 || targetIdx >= steps.length) return;
-
-            const temp = steps[stepIdx];
-            steps[stepIdx] = steps[targetIdx];
-            steps[targetIdx] = temp;
-
-            saveData();
-            openTaskDetailModal(state.activeModalTask, targetIdx);
-            renderSelectedDaySchedule();
-            showToast('סדר התת-משימות עודכן בהצלחה!');
-        };
-
         window.openTaskDetailModal = function(group, stepIdx = 0) {
             state.activeModalTask = group;
             state.activeModalStepIdx = stepIdx;
@@ -1305,7 +1604,7 @@
             document.getElementById('taskModalTitle').textContent = group.title;
             document.getElementById('taskModalStepName').textContent = step.stepName;
             document.getElementById('taskModalTimeSlot').textContent = `${step.startTime || '16:00'} - ${step.endTime || '17:00'}`;
-            document.getElementById('taskModalAllocatedMins').value = step.allocatedTime || 30;
+            document.getElementById('taskModalAllocatedMinsInput').value = step.allocatedTime || 30;
             
             const stepDate = new Date(step.dateStr + 'T00:00:00');
             document.getElementById('taskModalDateStr').textContent = `${stepDate.getDate()}/${stepDate.getMonth() + 1}/${stepDate.getFullYear()}`;
@@ -1329,30 +1628,22 @@
                 const bubbleFormatted = `${bubbleDate.getDate()}/${bubbleDate.getMonth() + 1}`;
                 const isActive = idx === stepIdx;
 
-                const wrapper = document.createElement('div');
-                wrapper.className = 'flex flex-col items-center gap-1 shrink-0';
-
                 const bubble = document.createElement('button');
-                bubble.className = `p-2 rounded-2xl border text-center text-xs transition flex flex-col items-center justify-center min-w-[90px] ${
-                    isActive ? 'bg-slate-900 text-white border-slate-900 shadow-md font-bold' : st.completed ? 'bg-emerald-50 text-emerald-800 border-emerald-200 opacity-60' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                bubble.className = `p-2 rounded-2xl border text-center text-xs shrink-0 transition flex flex-col items-center justify-center min-w-[95px] ${
+                    isActive 
+                        ? 'bg-slate-900 text-white border-slate-900 shadow-md font-bold' 
+                        : st.completed 
+                            ? 'bg-emerald-50 text-emerald-800 border-emerald-200 opacity-60' 
+                            : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                 }`;
                 bubble.onclick = () => openTaskDetailModal(group, idx);
 
                 bubble.innerHTML = `
-                    <span class="truncate max-w-[80px] block font-extrabold text-[11px]">${st.stepName}</span>
+                    <span class="truncate max-w-[85px] block font-extrabold text-[11px]">${st.stepName}</span>
                     <span class="text-[10px] opacity-80 mt-0.5">${bubbleFormatted} (${st.startTime || '16:00'})</span>
+                    <span class="text-[9px] opacity-70 mt-0.5 font-semibold">${st.allocatedTime || 30} דק'</span>
                 `;
-                
-                const navBtns = document.createElement('div');
-                navBtns.className = 'flex gap-1';
-                navBtns.innerHTML = `
-                    <button onclick="moveSubStepInTaskDetail(${idx}, -1)" class="p-1 bg-slate-200 text-slate-700 hover:bg-slate-300 rounded-lg text-[10px]" title="הזז ימינה/למעלה"><i class="fa-solid fa-arrow-right"></i></button>
-                    <button onclick="moveSubStepInTaskDetail(${idx}, 1)" class="p-1 bg-slate-200 text-slate-700 hover:bg-slate-300 rounded-lg text-[10px]" title="הזז שמאלה/למטה"><i class="fa-solid fa-arrow-left"></i></button>
-                `;
-
-                wrapper.appendChild(bubble);
-                wrapper.appendChild(navBtns);
-                bubblesContainer.appendChild(wrapper);
+                bubblesContainer.appendChild(bubble);
             });
 
             document.getElementById('taskDetailModal').classList.remove('hidden');
@@ -1363,6 +1654,55 @@
             state.activeModalTask = null;
         };
 
+        window.updateActiveStepAllocatedMins = function(newMinsVal) {
+            if (!state.activeModalTask || state.activeModalStepIdx < 0) return;
+            const newMins = parseInt(newMinsVal) || 15;
+            const step = state.activeModalTask.steps[state.activeModalStepIdx];
+            step.allocatedTime = newMins;
+
+            const startMins = timeToMins(step.startTime || '16:00');
+            const endMinsTotal = startMins + newMins;
+            const endH = Math.floor(endMinsTotal / 60);
+            const endM = endMinsTotal % 60;
+            step.endTime = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
+
+            saveData();
+            document.getElementById('taskModalTimeSlot').textContent = `${step.startTime} - ${step.endTime}`;
+            openTaskDetailModal(state.activeModalTask, state.activeModalStepIdx);
+            renderSelectedDaySchedule();
+            showToast('הקצבת הדקות ושעת הסיום עודכנו!');
+        };
+
+        window.moveCurrentActiveTaskStepUp = function() {
+            if (!state.activeModalTask || state.activeModalStepIdx <= 0) return;
+            const idx = state.activeModalStepIdx;
+            const steps = state.activeModalTask.steps;
+            const temp = steps[idx];
+            steps[idx] = steps[idx - 1];
+            steps[idx - 1] = temp;
+
+            saveData();
+            openTaskDetailModal(state.activeModalTask, idx - 1);
+            renderSelectedDaySchedule();
+            showToast('סדר השלבים עודכן בהצלחה!');
+        };
+
+        window.moveCurrentActiveTaskStepDown = function() {
+            if (!state.activeModalTask) return;
+            const idx = state.activeModalStepIdx;
+            const steps = state.activeModalTask.steps;
+            if (idx >= steps.length - 1) return;
+            const temp = steps[idx];
+            steps[idx] = steps[idx + 1];
+            steps[idx + 1] = temp;
+
+            saveData();
+            openTaskDetailModal(state.activeModalTask, idx + 1);
+            renderSelectedDaySchedule();
+            showToast('סדר השלבים עודכן בהצלחה!');
+        };
+
+        // --- CHAIN RESCHEDULING MODAL & ENGINE ---
         window.openChainRescheduleModalFromTask = function() {
             if (!state.activeModalTask) return;
             openChainRescheduleModal(state.activeModalTask, state.activeModalStepIdx);
@@ -1381,6 +1721,7 @@
                     endTime: s.endTime || '16:30'
                 }))
             };
+
             renderChainTimelineUI();
             document.getElementById('chainRescheduleModal').classList.remove('hidden');
         };
@@ -1405,15 +1746,16 @@
                 row.innerHTML = `
                     <div class="flex items-center gap-1.5 overflow-hidden flex-1">
                         <div class="flex flex-col gap-0.5 shrink-0">
-                            <button onclick="moveChainItem(${idx}, -1)" class="text-slate-400 hover:text-slate-800 p-0.5"><i class="fa-solid fa-chevron-up text-[10px]"></i></button>
-                            <button onclick="moveChainItem(${idx}, 1)" class="text-slate-400 hover:text-slate-800 p-0.5"><i class="fa-solid fa-chevron-down text-[10px]"></i></button>
+                            <button type="button" onclick="moveChainItemUp(${idx})" class="p-1 text-slate-500 hover:text-slate-900 transition" title="הזז למעלה"><i class="fa-solid fa-arrow-up text-[11px]"></i></button>
+                            <button type="button" onclick="moveChainItemDown(${idx})" class="p-1 text-slate-500 hover:text-slate-900 transition" title="הזז למטה"><i class="fa-solid fa-arrow-down text-[11px]"></i></button>
                         </div>
                         <span class="w-3 h-3 rounded-full ${isStart ? 'bg-amber-500' : 'bg-slate-400'} shrink-0"></span>
                         <div class="truncate">
                             <span class="font-black text-slate-800 text-xs block truncate">${step.stepName}</span>
                             <div class="flex items-center gap-1 mt-0.5">
-                                <span class="text-[10px] text-slate-500 font-bold">משך (דק'):</span>
-                                <input type="number" min="5" value="${step.allocatedTime}" onchange="updateChainItemAllocatedTime(${idx}, this.value)" class="w-14 bg-slate-50 border border-slate-300 rounded-md p-0.5 text-center text-[10px] font-bold">
+                                <span class="text-[10px] text-slate-500 font-bold">משך:</span>
+                                <input type="number" value="${step.allocatedTime}" min="5" step="5" onchange="updateChainItemAllocatedMins(${idx}, this.value)" class="w-14 bg-slate-50 border border-slate-300 rounded-lg p-0.5 text-center text-[10px] font-bold text-slate-800">
+                                <span class="text-[10px] text-slate-500">דק'</span>
                             </div>
                         </div>
                     </div>
@@ -1426,31 +1768,36 @@
             });
         }
 
-        window.moveChainItem = function(idx, direction) {
-            if (!state.chainRescheduleData || !state.chainRescheduleData.items) return;
+        window.moveChainItemUp = function(idx) {
+            if (!state.chainRescheduleData || idx <= 0) return;
             const items = state.chainRescheduleData.items;
-            const targetIdx = idx + direction;
-            if (targetIdx < 0 || targetIdx >= items.length) return;
-
             const temp = items[idx];
-            items[idx] = items[targetIdx];
-            items[targetIdx] = temp;
-
+            items[idx] = items[idx - 1];
+            items[idx - 1] = temp;
             renderChainTimelineUI();
-            showToast('סדר התת-משימות עודכן!');
         };
 
-        window.updateChainItemAllocatedTime = function(idx, newMinsStr) {
-            if (!state.chainRescheduleData || !state.chainRescheduleData.items[idx]) return;
-            const newMins = parseInt(newMinsStr) || 30;
-            const item = state.chainRescheduleData.items[idx];
-            item.allocatedTime = newMins;
+        window.moveChainItemDown = function(idx) {
+            if (!state.chainRescheduleData) return;
+            const items = state.chainRescheduleData.items;
+            if (idx >= items.length - 1) return;
+            const temp = items[idx];
+            items[idx] = items[idx + 1];
+            items[idx + 1] = temp;
+            renderChainTimelineUI();
+        };
 
-            const [sH, sM] = (item.startTime || '16:00').split(':').map(Number);
-            const totalEndMins = (sH * 60) + sM + newMins;
-            const eH = Math.floor(totalEndMins / 60);
-            const eM = totalEndMins % 60;
-            item.endTime = `${String(eH).padStart(2, '0')}:${String(eM).padStart(2, '0')}`;
+        window.updateChainItemAllocatedMins = function(itemIdx, newMinsVal) {
+            if (!state.chainRescheduleData) return;
+            const newMins = parseInt(newMinsVal) || 15;
+            const target = state.chainRescheduleData.items[itemIdx];
+            target.allocatedTime = newMins;
+
+            const startMins = timeToMins(target.startTime);
+            const endMinsTotal = startMins + newMins;
+            const endH = Math.floor(endMinsTotal / 60);
+            const endM = endMinsTotal % 60;
+            target.endTime = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
 
             renderChainTimelineUI();
         };
@@ -1496,20 +1843,24 @@
             const group = state.taskGroups.find(g => g.id === state.chainRescheduleData.groupId);
             
             if (group) {
-                state.chainRescheduleData.items.forEach((item, idx) => {
-                    if (group.steps[idx]) {
-                        group.steps[idx].stepName = item.stepName;
-                        group.steps[idx].allocatedTime = item.allocatedTime;
-                        group.steps[idx].dateStr = item.dateStr;
-                        group.steps[idx].startTime = item.startTime;
-                        group.steps[idx].endTime = item.endTime;
-                    }
+                group.steps = state.chainRescheduleData.items.map((item, idx) => {
+                    const origStep = group.steps[idx] || {};
+                    return {
+                        id: origStep.id || ('stp_' + Date.now() + '_' + idx),
+                        stepName: item.stepName,
+                        allocatedTime: item.allocatedTime,
+                        dateStr: item.dateStr,
+                        startTime: item.startTime,
+                        endTime: item.endTime,
+                        reminders: origStep.reminders || [{ val: 30, unit: 'minutes' }],
+                        completed: origStep.completed || false
+                    };
                 });
 
                 saveData();
                 closeChainRescheduleModal();
                 if (state.activeModalTask && state.activeModalTask.id === group.id) {
-                    openTaskDetailModal(group, state.activeModalStepIdx);
+                    openTaskDetailModal(group, Math.min(state.activeModalStepIdx, group.steps.length - 1));
                 }
                 renderApp();
                 showToast('שרשרת המשימות עודכנה בהצלחה ביומן!');
@@ -1637,6 +1988,7 @@
             }
         };
 
+        // --- DYNAMIC TASK FORM CREATION ---
         window.handleTaskTypeChange = function() {
             const typeSelect = document.getElementById('taskTypeSelect');
             if (!typeSelect) return;
@@ -1670,7 +2022,7 @@
                 if (type === 'hebrew_article') {
                     if (customArea) customArea.classList.remove('hidden');
                     if (container) container.innerHTML = `
-                        <div class="text-xs font-bold text-slate-700 mb-1.5">שלבי קריאה וזמנים מומלצים:</div>
+                        <div class="text-xs font-bold text-slate-700 mb-1.5">שלבי קריאה וזמנים מומלצים (ניתן לשנות סדר):</div>
                         ${createStepInputRow('step_1', 'קריאה מרפפרת (כותרות, תקציר ומבוא)', 15)}
                         ${createStepInputRow('step_2', 'קריאה פעילה עם סימון דגשים וניתוח מסקנות', 45)}
                         ${createStepInputRow('step_3', 'סיכום מאמר', 30)}
@@ -1696,21 +2048,21 @@
                             ${createStepInputRow('pre_print_slides', 'הדפסת מצגת תמונות ופירושים ומצגת תמונות ריקה', 15)}
 
                             <div class="text-xs font-black text-slate-800 border-b pt-2 pb-1 flex items-center gap-1.5">
-                                <i class="fa-solid fa-brain text-amber-500"></i> הגדרת מושגים וקצב לימוד יומי:
+                                <i class="fa-solid fa-brain text-amber-500"></i> הגדרת מושגים וקצב לימוד יומי (משולב ומרווח):
                             </div>
 
                             <div class="grid grid-cols-2 gap-2 bg-white p-2.5 rounded-xl border border-slate-200">
                                 <div>
                                     <span class="text-[11px] font-bold text-slate-700 block mb-1">סך כמות מושגים:</span>
-                                    <input type="number" id="memoTotalConcepts" value="30" min="1" oninput="recalcMemoChunkDisplay()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-1.5 text-center text-xs font-bold">
+                                    <input type="number" id="memoTotalConcepts" value="10" min="1" oninput="recalcMemoChunkDisplay()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-1.5 text-center text-xs font-bold">
                                 </div>
                                 <div>
-                                    <span class="text-[11px] font-bold text-slate-700 block mb-1">כמות ללמוד ביום:</span>
-                                    <input type="number" id="memoBatchSize" value="10" min="1" oninput="recalcMemoChunkDisplay()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-1.5 text-center text-xs font-bold">
+                                    <span class="text-[11px] font-bold text-slate-700 block mb-1">כמות ללמוד במנה:</span>
+                                    <input type="number" id="memoBatchSize" value="3" min="1" oninput="recalcMemoChunkDisplay()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-1.5 text-center text-xs font-bold">
                                 </div>
                                 <div>
-                                    <span class="text-[11px] font-bold text-slate-700 block mb-1">כמות חזרות נצרך:</span>
-                                    <input type="number" id="memoRepsCount" value="3" min="1" oninput="recalcMemoChunkDisplay()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-1.5 text-center text-xs font-bold">
+                                    <span class="text-[11px] font-bold text-slate-700 block mb-1">חזרות משולבות:</span>
+                                    <input type="number" id="memoRepsCount" value="3" readonly class="w-full bg-slate-100 border border-slate-300 rounded-lg p-1.5 text-center text-xs font-bold text-slate-500">
                                 </div>
                                 <div>
                                     <span class="text-[11px] font-bold text-slate-700 block mb-1">דקות לכל מושג:</span>
@@ -1719,8 +2071,8 @@
                             </div>
 
                             <div class="text-[11px] font-bold text-slate-700 bg-amber-50 p-2 rounded-xl border border-amber-200 flex justify-between">
-                                <span>סיכום מנות שינון:</span>
-                                <span id="memoChunkDisplayInfo" class="text-amber-900 font-extrabold">חלבון מושגים בסדר עולה</span>
+                                <span>מבנה למידה:</span>
+                                <span id="memoChunkDisplayInfo" class="text-amber-900 font-extrabold">למידה בסדר עולה + חזרות משולבות מדורגות</span>
                             </div>
                         </div>
                     `;
@@ -1768,8 +2120,14 @@
 
         function createStepInputRow(id, label, defaultMins) {
             return `
-                <div class="flex items-center justify-between gap-2 text-xs bg-white p-2 rounded-xl border border-slate-200 shadow-xs" id="row_${id}">
-                    <span class="font-bold text-slate-700 flex-1 truncate">${label}</span>
+                <div class="flex items-center justify-between gap-2 text-xs bg-white p-2 rounded-xl border border-slate-200 shadow-xs step-row-container" id="row_${id}">
+                    <div class="flex items-center gap-1.5 flex-1 min-w-0">
+                        <div class="flex flex-col gap-0.5 shrink-0">
+                            <button type="button" onclick="moveSubStepUp(this)" class="p-1 text-slate-500 hover:text-slate-900 transition" title="הזז למעלה"><i class="fa-solid fa-arrow-up text-[10px]"></i></button>
+                            <button type="button" onclick="moveSubStepDown(this)" class="p-1 text-slate-500 hover:text-slate-900 transition" title="הזז למטה"><i class="fa-solid fa-arrow-down text-[10px]"></i></button>
+                        </div>
+                        <span class="font-bold text-slate-700 truncate">${label}</span>
+                    </div>
                     <div class="flex items-center gap-1 shrink-0">
                         <input type="number" data-step-label="${label}" value="${defaultMins}" min="5" class="step-time-input w-16 bg-slate-50 border border-slate-300 rounded-lg p-1 text-center text-xs font-black text-slate-800">
                         <span class="text-slate-500 font-medium">דק'</span>
@@ -1778,21 +2136,34 @@
             `;
         }
 
+        window.moveSubStepUp = function(btn) {
+            const row = btn.closest('.step-row-container');
+            if (row && row.previousElementSibling) {
+                row.parentNode.insertBefore(row, row.previousElementSibling);
+            }
+        };
+
+        window.moveSubStepDown = function(btn) {
+            const row = btn.closest('.step-row-container');
+            if (row && row.nextElementSibling) {
+                row.parentNode.insertBefore(row.nextElementSibling, row);
+            }
+        };
+
         window.recalcMemoChunkDisplay = function() {
             const totalEl = document.getElementById('memoTotalConcepts');
             const batchEl = document.getElementById('memoBatchSize');
-            const repsEl = document.getElementById('memoRepsCount');
             const minsEl = document.getElementById('memoMinsPerConcept');
-            if (!totalEl || !batchEl || !repsEl || !minsEl) return;
 
-            const total = parseInt(totalEl.value) || 30;
-            const batch = parseInt(batchEl.value) || 10;
-            const reps = parseInt(repsEl.value) || 3;
+            if (!totalEl || !batchEl || !minsEl) return;
+
+            const total = parseInt(totalEl.value) || 10;
+            const batch = parseInt(batchEl.value) || 3;
             const mins = parseInt(minsEl.value) || 5;
 
             const chunksCount = Math.ceil(total / batch);
             const infoEl = document.getElementById('memoChunkDisplayInfo');
-            if (infoEl) infoEl.textContent = `${chunksCount} קבוצות (בסדר עולה 1-${total}) x ${reps} חזרות משולבות (${mins} דק' למושג)`;
+            if (infoEl) infoEl.textContent = `${chunksCount} מנות לימוד בסדר עולה + חזרות משולבות מדורגות (${mins} דק' למושג)`;
         };
 
         window.generateAssignmentSubRows = function() {
@@ -1823,72 +2194,129 @@
             container.appendChild(tempDiv.firstElementChild);
         };
 
-        // --- INTERLEAVED SPACED REPETITION SCHEDULER FOR MEMORIZATION ---
+        // --- SMART AUTO SCHEDULER PROPOSAL ---
         window.generateSmartScheduleProposal = function() {
             const titleInput = document.getElementById('taskTitleInput');
             const title = titleInput ? titleInput.value.trim() : '';
-            if (!title) { showToast('אנא הזן את שם המשימה', 'warning'); return; }
+            if (!title) {
+                showToast('אנא הזן את שם המשימה', 'warning');
+                if (titleInput) titleInput.focus();
+                return;
+            }
 
             const dueDateVal = document.getElementById('taskDueDateInput').value;
-            if (!dueDateVal) { showToast('אנא בחר תאריך יעד', 'warning'); return; }
+            if (!dueDateVal) {
+                showToast('אנא בחר תאריך יעד', 'warning');
+                return;
+            }
 
             const dueDate = new Date(dueDateVal + 'T23:59:59');
             const startDate = new Date(state.selectedDate);
             startDate.setHours(0,0,0,0);
 
+            if (dueDate < startDate) {
+                showToast('תאריך היעד חייב להיות החל מהתאריך הנבחר', 'warning');
+                return;
+            }
+
             const steps = [];
             const type = document.getElementById('taskTypeSelect').value;
+            let showShortPeriodWarning = false;
 
             if (type === 'memorization') {
+                // 1. Prep tasks first
                 const inputs = document.querySelectorAll('.step-time-input');
                 inputs.forEach(input => {
                     const label = input.getAttribute('data-step-label') || 'שלב מקדים';
                     const mins = parseInt(input.value) || 20;
-                    steps.push({ label, mins, dayOffset: 0, passNum: 0 });
+                    steps.push({ label, mins, dayOffset: 0 });
                 });
 
-                const totalConcepts = parseInt(document.getElementById('memoTotalConcepts').value) || 30;
-                let batchSize = parseInt(document.getElementById('memoBatchSize').value) || 10;
-                const repsCount = parseInt(document.getElementById('memoRepsCount').value) || 3;
+                // 2. Interleaved Ascending Concept Batches
+                const totalConcepts = parseInt(document.getElementById('memoTotalConcepts').value) || 10;
+                let batchSize = parseInt(document.getElementById('memoBatchSize').value) || 3;
                 const minsPerConcept = parseInt(document.getElementById('memoMinsPerConcept').value) || 5;
+
+                const totalDaysAvail = Math.max(1, Math.ceil((dueDate - startDate) / (1000 * 60 * 60 * 24)));
+                if (totalDaysAvail < 3) showShortPeriodWarning = true;
 
                 const chunks = [];
                 let currentStart = 1;
                 while (currentStart <= totalConcepts) {
                     let currentEnd = Math.min(currentStart + batchSize - 1, totalConcepts);
-                    chunks.push({ start: currentStart, end: currentEnd, count: (currentEnd - currentStart + 1) });
+                    chunks.push({ 
+                        id: chunks.length + 1,
+                        start: currentStart, 
+                        end: currentEnd, 
+                        count: (currentEnd - currentStart + 1),
+                        label: `${currentStart}-${currentEnd}`
+                    });
                     currentStart = currentEnd + 1;
                 }
 
-                chunks.forEach((chunk, idx) => {
-                    const durationMins = chunk.count * minsPerConcept;
+                let dayCounter = 1;
+                chunks.forEach((chunk, i) => {
+                    const learnMins = chunk.count * minsPerConcept;
+                    
                     steps.push({
-                        label: `שינון מושגים ${chunk.start}-${chunk.end}`,
-                        mins: durationMins,
-                        dayOffset: idx,
-                        passNum: 1
+                        label: `למידה חדשה: מושגים ${chunk.label}`,
+                        mins: learnMins,
+                        dayOffset: dayCounter
                     });
 
-                    if (repsCount >= 2) {
+                    if (i > 0) {
+                        const prevChunk = chunks[i - 1];
                         steps.push({
-                            label: `שינון מושגים ${chunk.start}-${chunk.end} (חזרה 2)`,
-                            mins: durationMins,
-                            dayOffset: idx + 1,
-                            passNum: 2
+                            label: `חזרה ראשונה (משולבת): מושגים ${prevChunk.label}`,
+                            mins: Math.max(15, Math.round(prevChunk.count * minsPerConcept * 0.6)),
+                            dayOffset: dayCounter
                         });
                     }
 
-                    if (repsCount >= 3) {
+                    if (i > 1) {
+                        const olderChunk = chunks[i - 2];
                         steps.push({
-                            label: `שינון מושגים ${chunk.start}-${chunk.end} (חזרה 3)`,
-                            mins: durationMins,
-                            dayOffset: idx + 3,
-                            passNum: 3
+                            label: `חזרה שנייה (משולבת): מושגים ${olderChunk.label}`,
+                            mins: Math.max(15, Math.round(olderChunk.count * minsPerConcept * 0.5)),
+                            dayOffset: dayCounter
                         });
                     }
+
+                    dayCounter++;
                 });
 
-                steps.sort((a, b) => (a.dayOffset - b.dayOffset) || (a.passNum - b.passNum));
+                if (chunks.length > 0) {
+                    const lastChunk = chunks[chunks.length - 1];
+                    steps.push({
+                        label: `חזרה ראשונה (משולבת): מושגים ${lastChunk.label}`,
+                        mins: Math.max(15, Math.round(lastChunk.count * minsPerConcept * 0.6)),
+                        dayOffset: dayCounter
+                    });
+
+                    if (chunks.length > 1) {
+                        const secondLastChunk = chunks[chunks.length - 2];
+                        steps.push({
+                            label: `חזרה שנייה (משולבת): מושגים ${secondLastChunk.label}`,
+                            mins: Math.max(15, Math.round(secondLastChunk.count * minsPerConcept * 0.5)),
+                            dayOffset: dayCounter
+                        });
+                    }
+                    dayCounter++;
+
+                    steps.push({
+                        label: `חזרה שנייה (משולבת): מושגים ${lastChunk.label}`,
+                        mins: Math.max(15, Math.round(lastChunk.count * minsPerConcept * 0.5)),
+                        dayOffset: dayCounter
+                    });
+                    dayCounter++;
+                }
+
+                steps.push({ 
+                    label: `חזרה מסכמת משולבת - כלל המושגים (1-${totalConcepts})`, 
+                    mins: Math.max(25, Math.round(totalConcepts * 2.5)),
+                    dayOffset: Math.max(dayCounter, Math.max(1, totalDaysAvail - 1))
+                });
+
             } else if (type === 'exam_prep') {
                 const lessons = parseInt(document.getElementById('examLessonsCount').value) || 4;
                 const minsPerLec = parseInt(document.getElementById('examMinsPerLesson').value) || 40;
@@ -1900,464 +2328,3 @@
                 inputs.forEach(input => {
                     const label = input.getAttribute('data-step-label') || 'שלב במשימה';
                     const mins = parseInt(input.value) || 20;
-                    steps.push({ label, mins });
-                });
-            }
-
-            if (steps.length === 0) {
-                showToast('לא הוגדרו שלבים למשימה זו', 'warning');
-                return;
-            }
-
-            const remVal = parseInt(document.getElementById('newTaskReminderVal').value) || 30;
-            const remUnit = document.getElementById('newTaskReminderUnit').value;
-
-            const proposal = [];
-            let currentDay = new Date(startDate);
-
-            steps.forEach((step, idx) => {
-                if (step.dayOffset !== undefined) {
-                    currentDay = new Date(startDate);
-                    currentDay.setDate(currentDay.getDate() + step.dayOffset);
-                }
-                if (currentDay > dueDate) currentDay = new Date(dueDate);
-
-                let defaultStartH = 16 + (idx % 3) * 1.5;
-                let freeSlot = findNextFreeSlot(currentDay, Math.floor(defaultStartH), (defaultStartH % 1 === 0.5) ? 30 : 0, step.mins, proposal);
-
-                proposal.push({
-                    stepName: step.label,
-                    allocatedTime: step.mins,
-                    date: freeSlot.date,
-                    startTime: freeSlot.startTime,
-                    endTime: freeSlot.endTime,
-                    reminders: [{ val: remVal, unit: remUnit }]
-                });
-            });
-
-            const courseSelect = document.getElementById('taskCourseSelect');
-            const selectedCourseObj = (state.courses || []).find(c => c.id === courseSelect.value) || { name: 'כללי' };
-
-            state.generatedProposal = {
-                title: title,
-                courseId: courseSelect.value,
-                courseName: selectedCourseObj.name,
-                dueDate: dueDate,
-                items: proposal
-            };
-
-            renderProposalUI();
-        };
-
-        window.moveProposalItem = function(idx, direction) {
-            if (!state.generatedProposal || !state.generatedProposal.items) return;
-            const items = state.generatedProposal.items;
-            const targetIdx = idx + direction;
-            if (targetIdx < 0 || targetIdx >= items.length) return;
-
-            const temp = items[idx];
-            items[idx] = items[targetIdx];
-            items[targetIdx] = temp;
-
-            renderProposalUI();
-            showToast('סדר השלבים עודכן בהצעת השיבוץ!');
-        };
-
-        function renderProposalUI() {
-            const container = document.getElementById('proposalTimeline');
-            if (!container || !state.generatedProposal) return;
-            container.innerHTML = '';
-
-            state.generatedProposal.items.forEach((item, idx) => {
-                const dateISO = formatDateISO(item.date);
-                const row = document.createElement('div');
-                row.className = 'bg-white p-2.5 rounded-xl border border-slate-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-xs';
-                
-                row.innerHTML = `
-                    <div class="flex items-center gap-1.5 overflow-hidden flex-1">
-                        <div class="flex flex-col gap-0.5 shrink-0">
-                            <button onclick="moveProposalItem(${idx}, -1)" class="text-slate-400 hover:text-slate-800 p-0.5" title="הזז למעלה"><i class="fa-solid fa-chevron-up text-[10px]"></i></button>
-                            <button onclick="moveProposalItem(${idx}, 1)" class="text-slate-400 hover:text-slate-800 p-0.5" title="הזז למטה"><i class="fa-solid fa-chevron-down text-[10px]"></i></button>
-                        </div>
-                        <span class="w-2.5 h-2.5 rounded-full theme-bg-primary shrink-0"></span>
-                        <div class="truncate">
-                            <span class="font-extrabold text-slate-800 block text-xs truncate">${item.stepName}</span>
-                            <span class="text-slate-400 text-[10px] font-semibold">משך: ${item.allocatedTime} דק'</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-1.5 shrink-0">
-                        <input type="date" value="${dateISO}" onchange="updateProposalItemDate(${idx}, this.value)" class="bg-slate-50 border border-slate-300 rounded-lg p-1 text-[11px] font-bold text-slate-800">
-                        <input type="time" value="${item.startTime}" onchange="updateProposalItemTime(${idx}, this.value)" class="bg-slate-50 border border-slate-300 rounded-lg p-1 text-[11px] font-bold text-slate-800">
-                    </div>
-                `;
-                container.appendChild(row);
-            });
-
-            document.getElementById('scheduleProposalResult').classList.remove('hidden');
-        }
-
-        window.updateProposalItemDate = function(itemIdx, newDateStr) {
-            if (!state.generatedProposal || !newDateStr) return;
-            const newDate = new Date(newDateStr + 'T00:00:00');
-            const oldDate = new Date(state.generatedProposal.items[itemIdx].date);
-            const diffDays = Math.round((newDate - oldDate) / (1000 * 60 * 60 * 24));
-
-            state.generatedProposal.items[itemIdx].date = newDate;
-
-            for (let i = itemIdx + 1; i < state.generatedProposal.items.length; i++) {
-                const target = state.generatedProposal.items[i];
-                const targetDate = new Date(target.date);
-                targetDate.setDate(targetDate.getDate() + diffDays);
-                target.date = targetDate;
-            }
-
-            renderProposalUI();
-            showToast('תאריך השלב והשלבים שאחריו עודכנו!');
-        };
-
-        window.updateProposalItemTime = function(itemIdx, newTimeStr) {
-            if (!state.generatedProposal || !newTimeStr) return;
-            const item = state.generatedProposal.items[itemIdx];
-            item.startTime = newTimeStr;
-
-            const [sH, sM] = newTimeStr.split(':').map(Number);
-            const endMinsTotal = (sH * 60) + sM + item.allocatedTime;
-            const endH = Math.floor(endMinsTotal / 60);
-            const endM = endMinsTotal % 60;
-            item.endTime = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
-
-            renderProposalUI();
-        };
-
-        window.saveTaskAndSchedule = function() {
-            const type = document.getElementById('taskTypeSelect').value;
-
-            if (type === 'manual_course') {
-                const courseName = document.getElementById('manualCourseNameInput').value.trim() || 'קורס חדש';
-                const courseDate = document.getElementById('manualCourseDateInput').value || formatDateISO(state.selectedDate);
-                const location = document.getElementById('manualCourseLocationInput').value.trim() || 'חדר 219 בניין A';
-                const startTime = document.getElementById('manualCourseStartTime').value || '08:30';
-                const endTime = document.getElementById('manualCourseEndTime').value || '10:00';
-
-                const remVal = parseInt(document.getElementById('newTaskReminderVal').value) || 10;
-                const remUnit = document.getElementById('newTaskReminderUnit').value;
-
-                const manualEvent = {
-                    id: 'evt_manual_' + Date.now(),
-                    date: courseDate,
-                    startTime: startTime,
-                    endTime: endTime,
-                    title: `שיעור: ${courseName}`,
-                    course: courseName,
-                    type: 'lecture',
-                    location: location,
-                    isManualCourse: true,
-                    reminders: [{ val: remVal, unit: remUnit }]
-                };
-
-                state.events.push(manualEvent);
-                saveData();
-                closeAddTaskModal();
-                renderApp();
-                showToast('הקורס נוסף בהצלחה במעטפת צהובה!');
-                return;
-            }
-
-            if (!state.generatedProposal) generateSmartScheduleProposal();
-            if (!state.generatedProposal) return;
-
-            const group = {
-                id: 'grp_' + Date.now(),
-                title: state.generatedProposal.title,
-                courseId: state.generatedProposal.courseId,
-                courseName: state.generatedProposal.courseName,
-                steps: state.generatedProposal.items.map(p => ({
-                    id: 'stp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-                    stepName: p.stepName,
-                    allocatedTime: p.allocatedTime,
-                    dateStr: formatDateISO(p.date),
-                    startTime: p.startTime,
-                    endTime: p.endTime,
-                    reminders: p.reminders || [{ val: 30, unit: 'minutes' }],
-                    completed: false
-                }))
-            };
-
-            state.taskGroups.push(group);
-            saveData();
-            closeAddTaskModal();
-            renderApp();
-            showToast('המשימה והשלבים שובצו ביומן!');
-        };
-
-        window.openExcelImportModal = function() {
-            state.excelImportPreview = [];
-            state.excelUpdatedEvents = [];
-            document.getElementById('excelPreviewArea').classList.add('hidden');
-            document.getElementById('confirmImportBtn').classList.add('hidden');
-            document.getElementById('excelFileInput').value = '';
-            document.getElementById('excelImportModal').classList.remove('hidden');
-        };
-
-        window.closeExcelImportModal = function() {
-            document.getElementById('excelImportModal').classList.add('hidden');
-        };
-
-        window.handleExcelFileUpload = function(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const jsonRows = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
-                    processExcelImportRows(jsonRows);
-                } catch (err) {
-                    console.error("Excel Read Error:", err);
-                    showToast('שגיאה בקריאת קובץ האקסל', 'warning');
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        };
-
-        function processExcelImportRows(rows) {
-            let duplicatesCount = 0;
-            const newEventsList = [];
-            const updatedEventsList = [];
-
-            rows.forEach((row, index) => {
-                const title = (row['כותרת'] || row['אירוע'] || row['שם השיעור'] || row['Title'] || row['Subject'] || 'אירוע אקדמי').toString().trim();
-                const courseClean = cleanCourseName(title);
-                let dateStr = row['תאריך'] || row['Date'] || '';
-                const startTime = (row['שעת התחלה'] || row['מ-שעה'] || row['Start Time'] || '08:30').toString().trim();
-                const endTime = (row['שעת סיום'] || row['עד-שעה'] || row['End Time'] || '10:00').toString().trim();
-                const parsedLocation = parseLocationFromExcelRow(row);
-
-                if (typeof dateStr === 'number') {
-                    const parsedDate = XLSX.SSF.parse_date_code(dateStr);
-                    dateStr = `${parsedDate.y}-${String(parsedDate.m).padStart(2, '0')}-${String(parsedDate.d).padStart(2, '0')}`;
-                } else if (dateStr && dateStr.includes('/')) {
-                    const parts = dateStr.split('/');
-                    if (parts.length === 3) dateStr = `${parts[2]}-${String(parts[1]).padStart(2, '0')}-${String(parts[0]).padStart(2, '0')}`;
-                }
-
-                if (!dateStr || !dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) dateStr = formatDateISO(state.selectedDate);
-
-                const existingEvent = state.events.find(e => e.date === dateStr && (e.title === title || e.course === courseClean));
-
-                if (existingEvent) {
-                    if (parsedLocation && parsedLocation !== 'קמפוס' && existingEvent.location !== parsedLocation) {
-                        existingEvent.location = parsedLocation;
-                        updatedEventsList.push(existingEvent);
-                    } else { duplicatesCount++; }
-                } else {
-                    newEventsList.push({
-                        tempId: 'imp_' + index + '_' + Date.now(),
-                        date: dateStr,
-                        startTime: startTime,
-                        endTime: endTime,
-                        title: title,
-                        course: courseClean,
-                        type: title.includes('מבחן') ? 'exam' : 'lecture',
-                        location: parsedLocation,
-                        reminders: [{ val: 10, unit: 'minutes' }]
-                    });
-                }
-            });
-
-            state.excelImportPreview = newEventsList;
-            state.excelUpdatedEvents = updatedEventsList;
-            renderExcelPreviewUI(duplicatesCount, updatedEventsList.length);
-        }
-
-        function renderExcelPreviewUI(duplicatesCount, updatedCount) {
-            const container = document.getElementById('excelPreviewList');
-            if (!container) return;
-            container.innerHTML = '';
-
-            const summaryEl = document.getElementById('excelSummaryTitle');
-            if (summaryEl) summaryEl.textContent = `תוצאות טעינה: ${state.excelImportPreview.length} אירועים חדשים, ${updatedCount} אירועים מעודכנים`;
-
-            const confirmBtn = document.getElementById('confirmImportBtn');
-
-            if (state.excelImportPreview.length === 0 && updatedCount === 0) {
-                container.innerHTML = `<p class="text-slate-500 italic py-4 text-center">כל האירועים בקובץ כבר מעודכנים ומסונכרנים ביומן!</p>`;
-                if (confirmBtn) confirmBtn.classList.add('hidden');
-            } else {
-                state.excelImportPreview.forEach((evt, idx) => {
-                    const row = document.createElement('div');
-                    row.className = 'bg-white p-2.5 rounded-xl border border-slate-200 text-xs flex items-center justify-between gap-2 shadow-xs';
-                    row.innerHTML = `
-                        <div class="flex-1 space-y-1">
-                            <input type="text" value="${evt.title}" onchange="state.excelImportPreview[${idx}].title = this.value" class="w-full font-bold text-slate-800 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1">
-                            <div class="flex gap-2">
-                                <input type="text" value="${evt.location}" onchange="state.excelImportPreview[${idx}].location = this.value" class="w-1/2 text-[11px] text-emerald-800 font-bold bg-emerald-50 border border-emerald-200 rounded-lg px-2 py-0.5">
-                                <input type="date" value="${evt.date}" onchange="state.excelImportPreview[${idx}].date = this.value" class="w-1/2 text-[11px] text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-2 py-0.5">
-                            </div>
-                        </div>
-                        <button onclick="removeExcelPreviewRow(${idx})" class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition"><i class="fa-solid fa-trash-can"></i></button>
-                    `;
-                    container.appendChild(row);
-                });
-                if (confirmBtn) confirmBtn.classList.remove('hidden');
-            }
-            document.getElementById('excelPreviewArea').classList.remove('hidden');
-        }
-
-        window.removeExcelPreviewRow = function(idx) {
-            state.excelImportPreview.splice(idx, 1);
-            renderExcelPreviewUI(0, state.excelUpdatedEvents.length);
-        };
-
-        window.confirmExcelImport = function() {
-            if (state.excelImportPreview.length === 0 && state.excelUpdatedEvents.length === 0) return;
-            state.excelImportPreview.forEach(item => {
-                state.events.push({
-                    id: 'evt_custom_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-                    date: item.date,
-                    startTime: item.startTime,
-                    endTime: item.endTime,
-                    title: item.title,
-                    course: item.course,
-                    type: item.type,
-                    location: item.location,
-                    reminders: item.reminders
-                });
-            });
-
-            saveData();
-            closeExcelImportModal();
-            renderApp();
-            showToast('הייבוא הושלם בהצלחה!');
-        };
-
-        function checkAndSyncNotificationButtonUI() {
-            const btn = document.getElementById('notifBtn');
-            const icon = document.getElementById('notifBtnIcon');
-            const text = document.getElementById('notifBtnText');
-
-            if (!("Notification" in window)) return;
-            if (Notification.permission === "granted") {
-                if (btn) btn.className = "bg-emerald-800 hover:bg-emerald-700 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-xl transition flex items-center gap-1 shadow-xs";
-                if (text) text.textContent = "התראות פעילות";
-                if (icon) icon.className = "fa-solid fa-bell text-emerald-300 text-xs";
-            }
-        }
-
-        window.requestNotificationPermission = function() {
-            if (!("Notification" in window)) { showToast("הדפדפן אינו תומך בהתראות דחיפה", "warning"); return; }
-            if (Notification.permission === "granted") {
-                checkAndSyncNotificationButtonUI();
-                showToast("התראות כבר פעילות ומאושרות במערכת!");
-                new Notification("רוני סטודנט פלאנר", { body: "ההתראות פעילות בהצלחה!" });
-                return;
-            }
-            Notification.requestPermission().then(permission => {
-                if (permission === "granted") {
-                    checkAndSyncNotificationButtonUI();
-                    showToast("התראות הופעלו בהצלחה!");
-                }
-            });
-        };
-
-        window.addNewCoursePrompt = function() {
-            const name = prompt('הכנס שם קורס חדש:');
-            if (!name) return;
-            const newCourse = { id: 'c_' + Date.now(), name: name, color: '#0284c7' };
-            state.courses.push(newCourse);
-            saveData();
-            populateFilteredCourseSelect();
-            document.getElementById('taskCourseSelect').value = newCourse.id;
-            showToast('קורס חדש נוסף');
-        };
-
-        window.openAddTaskModal = function() {
-            populateFilteredCourseSelect();
-            document.getElementById('addTaskModal').classList.remove('hidden');
-            state.generatedProposal = null;
-            document.getElementById('scheduleProposalResult').classList.add('hidden');
-        };
-
-        window.closeAddTaskModal = function() {
-            document.getElementById('addTaskModal').classList.add('hidden');
-        };
-
-        window.toggleSheetExpand = function() {
-            state.sheetExpanded = !state.sheetExpanded;
-            const grid = document.getElementById('calendarGrid');
-            const icon = document.getElementById('expandSheetIcon');
-            if (state.sheetExpanded) {
-                if (grid) grid.classList.add('hidden');
-                if (icon) icon.className = 'fa-solid fa-chevron-down text-xs';
-            } else {
-                if (grid) grid.classList.remove('hidden');
-                if (icon) icon.className = 'fa-solid fa-chevron-up text-xs';
-            }
-        };
-
-        function getEventsForDate(date) {
-            const iso = formatDateISO(date);
-            return (state.events || []).filter(e => e.date === iso);
-        }
-
-        function getTaskStepsForDate(date) {
-            const iso = formatDateISO(date);
-            const results = [];
-            (state.taskGroups || []).forEach(group => {
-                if (group && Array.isArray(group.steps)) {
-                    group.steps.forEach((step, stepIdx) => {
-                        if (step && step.dateStr === iso) {
-                            results.push({ group, step, stepIdx });
-                        }
-                    });
-                }
-            });
-            return results;
-        }
-
-        function isToday(date) { return isSameDate(date, new Date()); }
-
-        function isSameDate(d1, d2) {
-            return d1.getFullYear() === d2.getFullYear() &&
-                   d1.getMonth() === d2.getMonth() &&
-                   d1.getDate() === d2.getDate();
-        }
-
-        function getStartOfWeek(date) {
-            const d = new Date(date);
-            const day = d.getDay();
-            const diff = d.getDate() - day;
-            return new Date(d.setDate(diff));
-        }
-
-        function formatDateISO(date) {
-            const y = date.getFullYear();
-            const m = String(date.getMonth() + 1).padStart(2, '0');
-            const d = String(date.getDate()).padStart(2, '0');
-            return `${y}-${m}-${d}`;
-        }
-
-        function showToast(msg, type = 'success') {
-            const toast = document.getElementById('toast');
-            const msgEl = document.getElementById('toastMessage');
-            const iconEl = document.getElementById('toastIcon');
-
-            if (!toast || !msgEl) return;
-            msgEl.textContent = msg;
-            if (type === 'warning') { iconEl.className = 'fa-solid fa-triangle-exclamation text-amber-400'; }
-            else { iconEl.className = 'fa-solid fa-circle-check theme-text-primary'; }
-
-            toast.classList.remove('opacity-0', 'pointer-events-none');
-            toast.classList.add('opacity-100');
-
-            setTimeout(() => {
-                toast.classList.remove('opacity-100');
-                toast.classList.add('opacity-0', 'pointer-events-none');
-            }, 3000);
-        }
-    </script>
-</body>
-</html>
